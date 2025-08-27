@@ -7,7 +7,7 @@
 1. 작업은 main 브랜치가 아닌 작업용 브랜치를 따로 만들어서 진행해주세요.
 2. 작업에서 하나의 커밋 진행 후, `git pull origin main --rebase`를 통해 작업 브랜치의 최신화를 유지해주세요.
 3. 작업이 끝나면 해당 작업을 브랜치에 push 후 PR을 진행해주세요
-4. 2명 이상 PR 승인을 하면 main branch와 Squash merge 해주세요.
+4. 1명 이상 PR 승인을 하면 main branch와 Squash merge 해주세요.
 5. merge 후에는 브런치를 삭제해주시고, `git fetch --prune`을 통해 로컬에 남아있는 원격 레포지토리를 정리해주세요.
 
 ### 작업용 브랜치 양식
