@@ -36,13 +36,13 @@ public class MemberController {
     public RsData<MemberDto> join(
             @Valid @RequestBody MemberJoinReqDto reqBody
     ){
-        memberService.findByEmail(reqBody.email()).ifPresent(member -> {
+        memberService.findByEmail(reqBody.email).ifPresent(member -> {
             throw new ServiceException("409","이미 존재하는 이메일 입니다. 다시 입력해주세요.");
         });
         Member member = memberService.join(
-                reqBody.name(),
-                reqBody.email(),
-                passwordEncoder.encode(reqBody.password())
+                reqBody.name,
+                reqBody.email,
+                passwordEncoder.encode(reqBody.password)
         );
         return new RsData<>(
                 "201-1",
@@ -56,10 +56,10 @@ public class MemberController {
     public RsData<MemberLoginResDto> login(
             @Valid @RequestBody MemberLoginReqDto reqBody
     ){
-        Member member = memberService.findByEmail(reqBody.email())
+        Member member = memberService.findByEmail(reqBody.email)
                 .orElseThrow(()->new ServiceException("401-1", "존재하지 않는 아이디입니다."));
 
-        memberService.checkPassword(member, reqBody.password());
+        memberService.checkPassword(member, reqBody.password);
 
         String accessToken = memberService.geneAccessToken(member);
         String refreshToken = memberService.geneRefreshToken(member);
