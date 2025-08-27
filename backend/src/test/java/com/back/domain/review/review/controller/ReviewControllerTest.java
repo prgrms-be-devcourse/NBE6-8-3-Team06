@@ -61,7 +61,7 @@ public class ReviewControllerTest {
     void t1() throws Exception {
         Member member = memberService.findByEmail("email1@a.a").get();
         String accessToken = authTokenService.genAccessToken(member);
-        Book book = bookRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(1);
         ResultActions resultActions = addReview(book.getId(),accessToken);
         Review review = reviewService.findLatest().orElseThrow(()-> new RuntimeException("리뷰가 없습니다."));
         resultActions
@@ -82,7 +82,8 @@ public class ReviewControllerTest {
     void t1_2() throws Exception {
         Member member = memberService.findByEmail("email1@a.a").get();
         String accessToken = authTokenService.genAccessToken(member);
-        Book book = bookRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(1);
+        long count = reviewService.count();
         addReview(book.getId(),accessToken);
         ResultActions resultActions = addReview(book.getId(),accessToken);
         resultActions
@@ -91,7 +92,7 @@ public class ReviewControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.resultCode").value("400-1"))
                 .andExpect(jsonPath("$.msg").value("Review already exists"));
-        assertThat(reviewService.count()).isEqualTo(1);
+        assertThat(reviewService.count() - count).isEqualTo(1);
     }
 
     @Test
@@ -99,13 +100,13 @@ public class ReviewControllerTest {
     void t2() throws Exception {
         Member member = memberService.findByEmail("email1@a.a").get();
         String accessToken = authTokenService.genAccessToken(member);
-        Book book = bookRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(1);
         addReview(book.getId(),accessToken);
         Review review = reviewService.findLatest().orElseThrow(()-> new RuntimeException("리뷰가 없습니다."));
         assertThat(review.getId()).isGreaterThan(0);
 
         ResultActions resultActions = mvc.perform(
-                delete("/reviews/{book_id}", 1)
+                delete("/reviews/{book_id}", book.getId())
                         .contentType("application/json")
                         .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
@@ -117,7 +118,7 @@ public class ReviewControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("Review deleted successfully"))
         ;
-        assertThat(reviewService.findLatest()).isEmpty();
+        assertThat(reviewService.findById(review.getId())).isEmpty();
     }
 
     @Test
@@ -125,12 +126,12 @@ public class ReviewControllerTest {
     void t3() throws Exception {
         Member member = memberService.findByEmail("email1@a.a").get();
         String accessToken = authTokenService.genAccessToken(member);
-        Book book = bookRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(1);
         addReview(book.getId(),accessToken);
         Review review = reviewService.findLatest().orElseThrow(()-> new RuntimeException("리뷰가 없습니다."));
         assertThat(review.getId()).isGreaterThan(0);
         ResultActions resultActions = mvc.perform(
-                put("/reviews/{book_id}", 1)
+                put("/reviews/{book_id}", book.getId())
                         .contentType("application/json")
                         .content("""
 {
@@ -157,13 +158,13 @@ public class ReviewControllerTest {
     void t4() throws Exception{
         Member member = memberService.findByEmail("email1@a.a").get();
         String accessToken = authTokenService.genAccessToken(member);
-        Book book = bookRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(1);
         addReview(book.getId(),accessToken);
         Review review = reviewService.findLatest().orElseThrow(()-> new RuntimeException("리뷰가 없습니다."));
         assertThat(review.getId()).isGreaterThan(0);
 
         ResultActions resultActions = mvc.perform(
-                get("/reviews/{book_id}", 1)
+                get("/reviews/{book_id}", book.getId())
                         .cookie(new Cookie("accessToken", accessToken))
         ).andDo(print());
 
@@ -183,7 +184,7 @@ public class ReviewControllerTest {
     void t4_2() throws Exception{
         Member member = memberService.findByEmail("email1@a.a").get();
         String accessToken = authTokenService.genAccessToken(member);
-        Book book = bookRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(1);
 
         ResultActions resultActions = mvc.perform(
                 get("/reviews/{book_id}", book.getId())
