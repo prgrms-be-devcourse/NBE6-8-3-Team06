@@ -116,7 +116,7 @@ class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%s님 환영합니다.".formatted(email)))
-                .andExpect(jsonPath("$.data.memDto.email").value(email))
+                .andExpect(jsonPath("$.data.memberDto.email").value(email))
                 .andExpect(jsonPath("$.data.accessToken").value(accessToken));
 
 

@@ -38,8 +38,8 @@ class MemberController {
                 throw ServiceException("409", "이미 존재하는 이메일 입니다. 다시 입력해주세요.")
             })
         val member = memberService.join(
-            reqBody.name!!,
-            reqBody.email!!,
+            reqBody.name,
+            reqBody.email,
             passwordEncoder!!.encode(reqBody.password)
         )
         return RsData<MemberDto?>(
