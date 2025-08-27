@@ -1,12 +1,18 @@
-package com.back.domain.bookmarks.constant;
+package com.back.domain.bookmarks.constant
 
-public enum ReadState {
+enum class ReadState {
     WISH, READING, READ;
 
-    public ReadState getState(String state) {
-        if(state.equals("WISH")){ return WISH; }
-        if(state.equals("READING")){ return READING; }
-        if(state.equals("READ")){ return READ; }
-        return null;
+    fun getState(state: String): ReadState? {
+        if (state == "WISH") {
+            return ReadState.WISH
+        }
+        if (state == "READING") {
+            return ReadState.READING
+        }
+        if (state == "READ") {
+            return ReadState.READ
+        }
+        return null
     }
 }

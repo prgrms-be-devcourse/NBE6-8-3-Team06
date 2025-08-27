@@ -1,26 +1,28 @@
-package com.back.domain.bookmarks.repository;
+package com.back.domain.bookmarks.repository
 
-import com.back.domain.book.book.entity.Book;
-import com.back.domain.bookmarks.entity.Bookmark;
-import com.back.domain.member.member.entity.Member;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import com.back.domain.book.book.entity.Book
+import com.back.domain.bookmarks.entity.Bookmark
+import com.back.domain.member.member.entity.Member
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.util.*
 
-import java.util.List;
-import java.util.Optional;
+interface BookmarkRepository : JpaRepository<Bookmark, Int>, JpaSpecificationExecutor<Bookmark?>, BookmarkRepositoryCustom {
+    fun findByBook(book: Book): Optional<Bookmark>
+    fun findByIdAndMember(id: Int, member: Member): Optional<Bookmark>
+    fun findByMember(member: Member): MutableList<Bookmark>
+    fun findByMemberAndBook(member: Member, book: Book): Optional<Bookmark>
 
-public interface BookmarkRepository extends JpaRepository<Bookmark, Integer>, JpaSpecificationExecutor<Bookmark>, BookmarkRepositoryCustom {
-    Optional<Bookmark> findById(int id);
-    Optional<Bookmark> findByBook(Book book);
-    Optional<Bookmark> findByIdAndMember(int id, Member member);
-    List<Bookmark> findByMember(Member member);
-    Optional<Bookmark> findByMemberAndBook(Member member, Book book);
     @Query("SELECT b FROM Bookmark b WHERE b.member = :member AND b.book.id IN :bookIds")
-    List<Bookmark> findByMemberAndBookIds(@Param("member") Member member, @Param("bookIds") List<Integer> bookIds);
+    fun findByMemberAndBookIds(
+        @Param("member") member: Member,
+        @Param("bookIds") bookIds: MutableList<Int?>
+    ): MutableList<Bookmark>
+
     @Query("SELECT b FROM Bookmark b WHERE b.member = :member AND b.book = :book")
-    Optional<Bookmark> findByMemberAndBookWithFresh(@Param("member") Member member, @Param("book") Book book);
-    boolean existsByMemberAndBook(Member member, Book book);
-    Optional<Bookmark> getBookmarkByMemberOrderByIdDesc(Member member);
+    fun findByMemberAndBookWithFresh(@Param("member") member: Member, @Param("book") book: Book): Optional<Bookmark>
+    fun existsByMemberAndBook(member: Member, book: Book): Boolean
+    fun getBookmarkByMemberOrderByIdDesc(member: Member): Optional<Bookmark>
 }

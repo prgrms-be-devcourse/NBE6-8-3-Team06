@@ -1,82 +1,80 @@
-package com.back.domain.bookmarks.entity;
+package com.back.domain.bookmarks.entity
 
-import com.back.domain.book.book.entity.Book;
-import com.back.domain.bookmarks.constant.ReadState;
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.note.entity.Note;
-import com.back.global.jpa.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.back.domain.book.book.entity.Book
+import com.back.domain.bookmarks.constant.ReadState
+import com.back.domain.member.member.entity.Member
+import com.back.domain.note.entity.Note
+import com.back.global.jpa.entity.BaseEntity
+import jakarta.persistence.*
+import lombok.AccessLevel
+import lombok.NoArgsConstructor
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Bookmark extends BaseEntity {
+class Bookmark(
+    @field:JoinColumn(name = "book_id")
+    @field:ManyToOne(fetch = FetchType.LAZY)
+    var book: Book,
+    @field:JoinColumn(name = "member_id")
+    @field:ManyToOne(fetch = FetchType.LAZY)
+    var member: Member
+) : BaseEntity() {
     @Enumerated(EnumType.STRING)
-    private ReadState readState;
-    private int readPage;
-    private LocalDateTime startReadDate;
-    private LocalDateTime endReadDate;
+    lateinit var readState: ReadState
 
-    public Bookmark(Book book,  Member member) {
-        this.book = book;
-        this.member = member;
-        this.readState = ReadState.WISH;
-    }
+    var readPage: Int = 0
 
-    public void updateReadState(ReadState readState) {
-        if(readState == ReadState.WISH){
-            this.startReadDate = null;
-            this.endReadDate = null;
-            this.readPage = 0;
+    var startReadDate: LocalDateTime? = null
+
+    var endReadDate: LocalDateTime? = null
+
+
+    fun updateReadState(readState: ReadState) {
+        if (readState == ReadState.WISH) {
+            this.startReadDate = null
+            this.endReadDate = null
+            this.readPage = 0
         }
-        if(readState == ReadState.READING){
-            this.endReadDate = null;
+        if (readState == ReadState.READING) {
+            this.endReadDate = null
         }
-        this.readState = readState;
+        this.readState = readState
     }
 
-    public void updateReadPage(int readPage) {
-        this.readPage = readPage;
-    }
-    public void updateStartReadDate(LocalDateTime startReadDate) {
-        this.startReadDate = startReadDate;
-    }
-    public void updateEndReadDate(LocalDateTime endReadDate) {
-        this.endReadDate = endReadDate;
+    fun updateReadPage(readPage: Int) {
+        this.readPage = readPage
     }
 
-    @OneToMany(mappedBy = "bookmark", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<Note> notes = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    public int calculateReadingRate(){
-        if(readState == ReadState.WISH) return 0;
-        int totalPage = book.getTotalPage();
-        if(totalPage == 0) return 0;
-        if(readPage >= totalPage) return 100;
-        if(readPage <= 0) return 0;
-        double rate = ((double) readPage/totalPage) * 100;
-        return (int) Math.round(rate);
+    fun updateStartReadDate(startReadDate: LocalDateTime) {
+        this.startReadDate = startReadDate
     }
 
-    public long calculateReadingDuration(){
-        if(readState == ReadState.WISH) return 0;
-        LocalDateTime effectiveEnd = (endReadDate == null) ? LocalDateTime.now() : endReadDate;
-        return ChronoUnit.DAYS.between(startReadDate, effectiveEnd)+1;
+    fun updateEndReadDate(endReadDate: LocalDateTime) {
+        this.endReadDate = endReadDate
+    }
+
+    @OneToMany(mappedBy = "bookmark", cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
+    val notes: MutableList<Note> = ArrayList()
+
+    init {
+        this.readState = ReadState.WISH
+    }
+
+    fun calculateReadingRate(): Int {
+        if (readState == ReadState.WISH) return 0
+        val totalPage = book.getTotalPage()
+        if (totalPage == 0) return 0
+        if (readPage >= totalPage) return 100
+        if (readPage <= 0) return 0
+        val rate = (readPage.toDouble() / totalPage) * 100
+        return Math.round(rate).toInt()
+    }
+
+    fun calculateReadingDuration(): Long {
+        if (readState == ReadState.WISH) return 0
+        val effectiveEnd = (if (endReadDate == null) java.time.LocalDateTime.now() else endReadDate)
+        return ChronoUnit.DAYS.between(startReadDate, effectiveEnd) + 1
     }
 }
