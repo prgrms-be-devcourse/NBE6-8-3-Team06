@@ -1,36 +1,32 @@
-package com.back.domain.review.review.repository;
+package com.back.domain.review.review.repository
 
-import com.back.domain.book.book.entity.Book;
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.review.review.entity.Review;
-import jakarta.persistence.LockModeType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import com.back.domain.book.book.entity.Book
+import com.back.domain.member.member.entity.Member
+import com.back.domain.review.review.entity.Review
+import jakarta.persistence.LockModeType
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.util.*
 
-import java.util.List;
-import java.util.Optional;
+interface ReviewRepository : JpaRepository<Review, Int> {
+    fun findFirstByOrderByIdDesc(): Optional<Review>
 
-public interface ReviewRepository extends JpaRepository<Review, Integer> {
-    Optional<Review> findFirstByOrderByIdDesc();
-
-
-    Optional<Review> findById(int id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Review> findWithLockById(int id);
+    fun findWithLockById(id: Int): Optional<Review>
 
-    Optional<Review> findByBookAndMember(Book book, Member member);
+    fun findByBookAndMember(book: Book, member: Member): Optional<Review>
 
     @Query("SELECT AVG(rate) FROM Review WHERE member= :member")
-    Optional<Double> findAverageRatingByMember(@Param("member" ) Member member);
+    fun findAverageRatingByMember(@Param("member") member: Member): Optional<Double>
 
-    List<Review> findAllByMember(Member member);
+    fun findAllByMember(member: Member): MutableList<Review>
 
-    Page<Review> findByBookOrderByCreateDateDesc(Book book, Pageable pageable);
+    fun findByBookOrderByCreateDateDesc(book: Book, pageable: Pageable): Page<Review>
 
-    Page<Review> findByBook(Book book, Pageable pageable);
+    fun findByBook(book: Book, pageable: Pageable): Page<Review>
 }

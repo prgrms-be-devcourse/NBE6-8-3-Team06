@@ -1,59 +1,46 @@
-package com.back.domain.review.review.entity;
+package com.back.domain.review.review.entity
 
-import com.back.domain.book.book.entity.Book;
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.review.reviewRecommend.entity.ReviewRecommend;
-import com.back.global.jpa.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.back.domain.book.book.entity.Book
+import com.back.domain.member.member.entity.Member
+import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
+import com.back.global.jpa.entity.BaseEntity
+import jakarta.persistence.*
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
 
 @Entity
-@Getter
-@NoArgsConstructor
-public class Review extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Book book;
-    @Setter
-    private String content;
-    @Setter
-    private int rate;
-    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<ReviewRecommend> reviewRecommends = new ArrayList<>();
-    @Setter
-    private int likeCount;
-    @Setter
-    private int dislikeCount;
-
-//    @Version
+class Review //    @Version
 //    private Long version;
+    (
+    var content: String,
+    var rate: Int,
+    @field:ManyToOne(fetch = FetchType.LAZY)
+    var member: Member,
+    @field:ManyToOne(fetch = FetchType.LAZY)
+    var book: Book
+) : BaseEntity() {
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, orphanRemoval = true, cascade = [CascadeType.ALL])
+    private val reviewRecommends: MutableList<ReviewRecommend> = ArrayList()
 
-    public Review(String content, int rate, Member member, Book book) {
-        this.content = content;
-        this.rate = rate;
-        this.member = member;
-        this.book = book;
+    var likeCount = 0
+
+
+    var dislikeCount = 0
+
+    fun incLike() {
+        this.likeCount++
     }
 
-    public void incLike(){
-        this.likeCount++;
+    fun decLike() {
+        this.likeCount--
     }
 
-    public void decLike(){
-        this.likeCount--;
+    fun incDislike() {
+        this.dislikeCount++
     }
 
-    public void incDislike(){
-        this.dislikeCount++;
-    }
-
-    public void decDislike(){
-        this.dislikeCount--;
+    fun decDislike() {
+        this.dislikeCount--
     }
 }

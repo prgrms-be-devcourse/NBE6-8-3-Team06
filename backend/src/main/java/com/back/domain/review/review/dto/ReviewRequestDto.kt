@@ -1,10 +1,10 @@
-package com.back.domain.review.review.dto;
+package com.back.domain.review.review.dto
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
-public record ReviewRequestDto(
-        @NotBlank String content,
-        @NotNull Integer rate
-) {
-};
+
+data class ReviewRequestDto(
+    @field:NotBlank val content: String,
+    val rate: Int
+)

@@ -1,51 +1,59 @@
-package com.back.domain.review.review.service;
+package com.back.domain.review.review.service
 
-import com.back.domain.book.book.entity.Book;
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.review.review.dto.ReviewRequestDto;
-import com.back.domain.review.review.dto.ReviewResponseDto;
-import com.back.domain.review.review.entity.Review;
-import com.back.domain.review.reviewRecommend.service.ReviewRecommendService;
-import com.back.global.dto.PageResponseDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
+import com.back.domain.book.book.entity.Book
+import com.back.domain.member.member.entity.Member
+import com.back.domain.review.review.dto.ReviewRequestDto
+import com.back.domain.review.review.dto.ReviewResponseDto
+import com.back.domain.review.review.entity.Review
+import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
+import com.back.global.dto.PageResponseDto
+import org.springframework.data.domain.Page
+import org.springframework.stereotype.Service
+import java.util.function.Function
+
 
 @Service
-@RequiredArgsConstructor
-public class ReviewDtoService {
-    private final ReviewRecommendService reviewRecommendService;
+class ReviewDtoService(
+    private val reviewRecommendService: ReviewRecommendService
+) {
 
-    public ReviewResponseDto reviewToReviewResponseDto(Review review, Member member) {
-        return ReviewResponseDto.builder()
-                .id(review.getId())
-                .content(review.getContent())
-                .rate(review.getRate())
-                .memberName(review.getMember().getName())
-                .memberId(review.getMember().getId())
-                .likeCount(review.getLikeCount())
-                .dislikeCount(review.getDislikeCount())
-                .isRecommended(reviewRecommendService.isRecommended(review, member))
-                .createdDate(review.getCreateDate())
-                .modifiedDate(review.getModifyDate())
-                .build();
+
+    fun reviewToReviewResponseDto(review: Review, member: Member): ReviewResponseDto {
+    val reviewResponseDto = ReviewResponseDto(
+        id = review.id,
+        content = review.content,
+        rate = review.rate,
+        memberName = member.name,
+        memberId = member.id,
+        likeCount = review.likeCount,
+        dislikeCount = review.dislikeCount,
+        isRecommended = reviewRecommendService.isRecommended(review, member),
+        createdDate = review.createDate,
+        modifiedDate = review.modifyDate
+    )
+        return reviewResponseDto
     }
 
-    public Review reviewRequestDtoToReview(ReviewRequestDto reviewRequestDto, Member member, Book book) {
-        return new Review(
-                reviewRequestDto.content(),
-                reviewRequestDto.rate(),
-                member,
-                book
-        );
+    fun reviewRequestDtoToReview(reviewRequestDto: ReviewRequestDto, member: Member, book: Book): Review {
+        return Review(
+            reviewRequestDto.content,
+            reviewRequestDto.rate,
+            member,
+            book
+        )
     }
 
-    public void updateReviewFromRequest(Review review, ReviewRequestDto reviewRequestDto) {
-        review.setContent(reviewRequestDto.content());
-        review.setRate(reviewRequestDto.rate());
+    fun updateReviewFromRequest(review: Review, reviewRequestDto: ReviewRequestDto) {
+        review.content = reviewRequestDto.content
+        review.rate = reviewRequestDto.rate
     }
 
-    public PageResponseDto<ReviewResponseDto> reviewsToReviewResponseDtos(Page<Review> reviewPage, Member member) {
-        return new PageResponseDto<>(reviewPage.map((review)-> reviewToReviewResponseDto(review, member)));
+    fun reviewsToReviewResponseDtos(reviewPage: Page<Review>, member: Member): PageResponseDto<ReviewResponseDto> {
+        return PageResponseDto(reviewPage.map(Function { review: Review ->
+            reviewToReviewResponseDto(
+                review,
+                member
+            )
+        }))
     }
 }
