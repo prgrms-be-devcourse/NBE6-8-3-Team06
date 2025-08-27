@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: back
+  profiles:
+    active: dev
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    hikari:
+      auto-commit: false
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
+    com.back: DEBUG
+custom:
+  jwt:
+    secretKey: abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
+  accessToken:
+    expirationSeconds: 1200
+  refreshToken:
+    expirationSeconds: 86400
+aladin:
+  api:
+    base-url: http://www.aladin.co.kr/ttb/api
+    key: ttbsnake10101245001
+    timeout:
+      connection: 5000
+      read: 15000
+    retry:
+      max-attempts: 3
+      delay: 1000
