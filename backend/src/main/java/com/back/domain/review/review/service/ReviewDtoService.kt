@@ -1,0 +1,59 @@
+package com.back.domain.review.review.service
+
+import com.back.domain.book.book.entity.Book
+import com.back.domain.member.member.entity.Member
+import com.back.domain.review.review.dto.ReviewRequestDto
+import com.back.domain.review.review.dto.ReviewResponseDto
+import com.back.domain.review.review.entity.Review
+import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
+import com.back.global.dto.PageResponseDto
+import org.springframework.data.domain.Page
+import org.springframework.stereotype.Service
+import java.util.function.Function
+
+
+@Service
+class ReviewDtoService(
+    private val reviewRecommendService: ReviewRecommendService
+) {
+
+
+    fun reviewToReviewResponseDto(review: Review, member: Member): ReviewResponseDto {
+    val reviewResponseDto = ReviewResponseDto(
+        id = review.id,
+        content = review.content,
+        rate = review.rate,
+        memberName = member.name,
+        memberId = member.id,
+        likeCount = review.likeCount,
+        dislikeCount = review.dislikeCount,
+        isRecommended = reviewRecommendService.isRecommended(review, member),
+        createdDate = review.createDate,
+        modifiedDate = review.modifyDate
+    )
+        return reviewResponseDto
+    }
+
+    fun reviewRequestDtoToReview(reviewRequestDto: ReviewRequestDto, member: Member, book: Book): Review {
+        return Review(
+            reviewRequestDto.content,
+            reviewRequestDto.rate,
+            member,
+            book
+        )
+    }
+
+    fun updateReviewFromRequest(review: Review, reviewRequestDto: ReviewRequestDto) {
+        review.content = reviewRequestDto.content
+        review.rate = reviewRequestDto.rate
+    }
+
+    fun reviewsToReviewResponseDtos(reviewPage: Page<Review>, member: Member): PageResponseDto<ReviewResponseDto> {
+        return PageResponseDto(reviewPage.map(Function { review: Review ->
+            reviewToReviewResponseDto(
+                review,
+                member
+            )
+        }))
+    }
+}
