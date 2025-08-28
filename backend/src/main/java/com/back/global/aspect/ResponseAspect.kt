@@ -1,23 +1,19 @@
-package com.back.global.aspect;
+package com.back.global.aspect
 
-import com.back.global.rsData.RsData;
-import jakarta.servlet.http.HttpServletResponse;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
+import com.back.global.rsData.RsData
+import jakarta.servlet.http.HttpServletResponse
+import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
+import org.aspectj.lang.annotation.Aspect
+import org.springframework.stereotype.Component
 
 @Aspect
 @Component
-public class ResponseAspect {
-
-    private final HttpServletResponse response;
-
-    public ResponseAspect(HttpServletResponse response) {
-        this.response = response;
-    }
-
-    @Around("""
+class ResponseAspect(
+    private val response: HttpServletResponse
+) {
+    @Around(
+        """
                 execution(public com.back.global.rsData.RsData *(..)) &&
                 (
                     within(@org.springframework.stereotype.Controller *) ||
@@ -30,14 +26,17 @@ public class ResponseAspect {
                     @annotation(org.springframework.web.bind.annotation.DeleteMapping) ||
                     @annotation(org.springframework.web.bind.annotation.RequestMapping)
                 )
-            """)
-    public Object handleResponse(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object proceed = joinPoint.proceed();
+            
+            """
+    )
+    @Throws(Throwable::class)
+    fun handleResponse(joinPoint: ProceedingJoinPoint): Any {
+        val proceed = joinPoint.proceed()
 
-        RsData<?> rsData = (RsData<?>) proceed;
-        response.setStatus(rsData.statusCode());
+        val rsData = proceed as RsData<*>
+        response.setStatus(rsData.statusCode)
 
-        return proceed;
+        return proceed
     }
 }
 
