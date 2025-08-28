@@ -62,8 +62,8 @@ public class NoteControllerMockTest {
 
         // 가짜 Note 데이터들
         List<Note> notes = Arrays.asList(
-                new Note("노트제목1", "노트내용1", "10", bookmark, null),
-                new Note("노트제목2", "노트내용2", "25", bookmark, null)
+                new Note(null, "노트제목1", "노트내용1", "10", bookmark),
+                new Note(null, "노트제목2", "노트내용2", "25", bookmark)
         );
 
         // Mock 동작 정의

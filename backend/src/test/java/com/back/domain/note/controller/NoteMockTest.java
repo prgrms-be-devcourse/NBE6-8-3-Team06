@@ -47,7 +47,7 @@ public class NoteMockTest {
         Bookmark bookmark = new Bookmark(null, null);
 
         // 가짜 Note 데이터 생성
-        Note note = new Note("제목", "내용", "10", bookmark, null);
+        Note note = new Note(null, "제목", "내용", "10", bookmark);
 
         // noteService mock 정의
         given(noteService.findBookmarkById(bookmarkId)).willReturn(Optional.of(bookmark));

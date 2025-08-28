@@ -41,7 +41,7 @@ public class NoteController {
             );
         }
 
-        Bookmark bookmark = noteService.findBookmarkById(bookmarkId).get();
+        Bookmark bookmark = noteService.findBookmarkById(bookmarkId);
 
         noteService.checkNotePageCURD(bookmark, actor, "조회", "403-1"); // 노트 페이지 조회 권한 확인
 
@@ -89,7 +89,7 @@ public class NoteController {
             );
         }
 
-        Bookmark bookmark = noteService.findBookmarkById(bookmarkId).get();
+        Bookmark bookmark = noteService.findBookmarkById(bookmarkId);
 
         noteService.checkNotePageCURD(bookmark, actor, "작성", "403-2"); // 노트 페이지 작성 권한 확인
 
@@ -135,11 +135,11 @@ public class NoteController {
             );
         }
 
-        Bookmark bookmark = noteService.findBookmarkById(bookmarkId).get();
+        Bookmark bookmark = noteService.findBookmarkById(bookmarkId);
 
         noteService.checkNotePageCURD(bookmark, actor, "수정", "403-3"); // 노트 페이지 작성 수정 확인
 
-        Note note = noteService.findNoteById(bookmark, id).get();
+        Note note = noteService.findNoteById(bookmark, id);
 
         noteService.modify(note, reqBody.title, reqBody.content, reqBody.page);
 
@@ -166,11 +166,11 @@ public class NoteController {
             );
         }
 
-        Bookmark bookmark = noteService.findBookmarkById(bookmarkId).get();
+        Bookmark bookmark = noteService.findBookmarkById(bookmarkId);
 
         noteService.checkNotePageCURD(bookmark, actor, "삭제", "403-4"); // 노트 페이지 삭제 권한 확인
 
-        Note note = noteService.findNoteById(bookmark, id).get();
+        Note note = noteService.findNoteById(bookmark, id);
 
         noteService.delete(bookmark, note);
 

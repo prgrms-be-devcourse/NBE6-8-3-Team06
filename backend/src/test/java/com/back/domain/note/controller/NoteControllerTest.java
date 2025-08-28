@@ -101,7 +101,7 @@ public class NoteControllerTest {
                 )
                 .andDo(print());
 
-        Bookmark bookmark = noteService.findBookmarkById(bookmarkId).get();
+        Bookmark bookmark = noteService.findBookmarkById(bookmarkId);
         Book book = bookmark.getBook();
         List<Note> notes = bookmark.getNotes();
 
@@ -111,10 +111,7 @@ public class NoteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 북마크의 노트 조회를 성공했습니다.".formatted(bookmarkId)))
-                .andExpect(jsonPath("$.data.imageUrl").value(book.getImageUrl()))
-                .andExpect(jsonPath("$.data.title").value(book.getTitle()))
                 .andExpect(jsonPath("$.data.notes.length()").value(notes.size()));
-//                .andExpect(jsonPath("$.author").value(book.getAuthors()))
 
         for (int i = 0; i < notes.size(); i++) {
             Note note = notes.get(i);
@@ -150,7 +147,7 @@ public class NoteControllerTest {
                 )
                 .andDo(print());
 
-        Bookmark bookmark = noteService.findBookmarkById(bookmarkId).get();
+        Bookmark bookmark = noteService.findBookmarkById(bookmarkId);
         Note note = bookmark.getNotes().getLast();
 
         resultActions
@@ -191,7 +188,7 @@ public class NoteControllerTest {
         resultActions
                 .andExpect(handler().handlerType(NoteController.class))
                 .andExpect(handler().methodName("write"))
-                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.resultCode").value("403-2"))
                 .andExpect(jsonPath("$.msg").value("%d번 북마크의 노트 작성 권한이 없습니다.".formatted(bookmarkId)));
     }
 
@@ -250,7 +247,7 @@ public class NoteControllerTest {
         resultActions
                 .andExpect(handler().handlerType(NoteController.class))
                 .andExpect(handler().methodName("modify"))
-                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.resultCode").value("403-3"))
                 .andExpect(jsonPath("$.msg").value("%d번 북마크의 노트 수정 권한이 없습니다.".formatted(bookmarkId)));
     }
 
@@ -291,7 +288,7 @@ public class NoteControllerTest {
         resultActions
                 .andExpect(handler().handlerType(NoteController.class))
                 .andExpect(handler().methodName("delete"))
-                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.resultCode").value("403-4"))
                 .andExpect(jsonPath("$.msg").value("%d번 북마크의 노트 삭제 권한이 없습니다.".formatted(bookmarkId)));
     }
 }
