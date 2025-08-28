@@ -23,7 +23,7 @@ class ReviewDtoService(
         id = review.id,
         content = review.content,
         rate = review.rate,
-        memberName = member.name,
+        memberName = member.getName(),
         memberId = member.id,
         likeCount = review.likeCount,
         dislikeCount = review.dislikeCount,

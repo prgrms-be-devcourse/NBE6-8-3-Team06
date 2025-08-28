@@ -3,7 +3,7 @@ package com.back.domain.member.member.service
 import com.back.domain.member.member.entity.Member
 import com.back.global.standard.util.Ut
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
+
 import org.springframework.stereotype.Service
 import java.util.Map
 
@@ -18,7 +18,7 @@ class AuthTokenService(
 ) {
    fun genAccessToken(member: Member): String? {
         val payload = mapOf(
-            "id" to member.getId(),
+            "id" to member.id,
             "email" to member.getEmail()
         )
 
@@ -31,7 +31,7 @@ class AuthTokenService(
 
     fun genRefreshToken(member: Member): String? {
         val payload = mapOf(
-            "id" to member.getId(),
+            "id" to member.id,
             "email" to member.getEmail()
         )
 
