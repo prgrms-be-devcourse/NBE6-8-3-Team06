@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -104,25 +106,25 @@ public class BookmarkControllerTest {
                 .andExpect(handler().methodName("getBookmark"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("%d번 조회 성공".formatted(bookmarkDto.bookmarkDto().id())))
+                .andExpect(jsonPath("$.msg").value("%d번 조회 성공".formatted(bookmarkDto.bookmarkDto.id)))
                 .andExpect(jsonPath("$.data.id").value(id))
-                .andExpect(jsonPath("$.data.bookId").value(bookmarkDto.bookmarkDto().bookId()))
-                .andExpect(jsonPath("$.data.readState").value(bookmarkDto.bookmarkDto().readState()))
-                .andExpect(jsonPath("$.data.readPage").value(bookmarkDto.bookmarkDto().readPage()))
-                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(bookmarkDto.bookmarkDto().createDate().toString().substring(0,18))))
+                .andExpect(jsonPath("$.data.bookId").value(bookmarkDto.bookmarkDto.bookId))
+                .andExpect(jsonPath("$.data.readState").value(bookmarkDto.bookmarkDto.readState))
+                .andExpect(jsonPath("$.data.readPage").value(bookmarkDto.bookmarkDto.readPage))
+                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(bookmarkDto.bookmarkDto.createDate.toString().substring(0,18))))
                 .andExpect(jsonPath("$.data.startReadDate").isEmpty())
                 .andExpect(jsonPath("$.data.endReadDate").isEmpty())
-                .andExpect(jsonPath("$.data.readingDuration").value(bookmarkDto.readingDuration()))
-                .andExpect(jsonPath("$.data.book.id").value(bookmarkDto.bookmarkDto().bookId()))
-                .andExpect(jsonPath("$.data.book.isbn13").value(bookmarkDto.bookmarkDto().book().isbn13()))
-                .andExpect(jsonPath("$.data.book.title").value(bookmarkDto.bookmarkDto().book().title()))
-                .andExpect(jsonPath("$.data.book.imageUrl").value(bookmarkDto.bookmarkDto().book().imageUrl()))
-                .andExpect(jsonPath("$.data.book.publisher").value(bookmarkDto.bookmarkDto().book().publisher()))
-                .andExpect(jsonPath("$.data.book.totalPage").value(bookmarkDto.bookmarkDto().book().totalPage()))
-                .andExpect(jsonPath("$.data.book.avgRate").value(bookmarkDto.bookmarkDto().book().avgRate()))
-                .andExpect(jsonPath("$.data.book.category").value(bookmarkDto.bookmarkDto().book().category()))
+                .andExpect(jsonPath("$.data.readingDuration").value(bookmarkDto.readingDuration))
+                .andExpect(jsonPath("$.data.book.id").value(bookmarkDto.bookmarkDto.bookId))
+                .andExpect(jsonPath("$.data.book.isbn13").value(bookmarkDto.bookmarkDto.book.isbn13))
+                .andExpect(jsonPath("$.data.book.title").value(bookmarkDto.bookmarkDto.book.title))
+                .andExpect(jsonPath("$.data.book.imageUrl").value(bookmarkDto.bookmarkDto.book.imageUrl))
+                .andExpect(jsonPath("$.data.book.publisher").value(bookmarkDto.bookmarkDto.book.publisher))
+                .andExpect(jsonPath("$.data.book.totalPage").value(bookmarkDto.bookmarkDto.book.totalPage))
+                .andExpect(jsonPath("$.data.book.avgRate").value(bookmarkDto.bookmarkDto.book.avgRate))
+                .andExpect(jsonPath("$.data.book.category").value(bookmarkDto.bookmarkDto.book.category))
 //                .andExpect(jsonPath("$.data.book.authors").value(bookmarkDto.bookmarkDto().book().authors()))
-                .andExpect(jsonPath("$.data.book.publishDate").value(Matchers.startsWith(bookmarkDto.bookmarkDto().book().publishDate().toString().substring(0,16))));
+                .andExpect(jsonPath("$.data.book.publishDate").value(Matchers.startsWith(bookmarkDto.bookmarkDto.book.publishDate.toString().substring(0,16))));
     }
 
     @Test
@@ -169,22 +171,22 @@ public class BookmarkControllerTest {
         for(int i=0;i<bookmarksDtoList.size();i++) {
             BookmarkDto bookmarksDto = bookmarksDtoList.get(i);
             resultActions
-                    .andExpect(jsonPath("$.data[%d].id".formatted(i)).value(bookmarksDto.id()))
-                    .andExpect(jsonPath("$.data[%d].bookId".formatted(i)).value(bookmarksDto.bookId()))
-                    .andExpect(jsonPath("$.data[%d].readState".formatted(i)).value(bookmarksDto.readState()))
-                    .andExpect(jsonPath("$.data[%d].readPage".formatted(i)).value(bookmarksDto.readPage()))
-                    .andExpect(jsonPath("$.data[%d].readingRate".formatted(i)).value(bookmarksDto.readingRate()))
-                    .andExpect(jsonPath("$.data[%d].createDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.createDate().toString().substring(0,18))))
-                    .andExpect(jsonPath("$.data[%d].book.id".formatted(i)).value(bookmarksDto.book().id()))
-                    .andExpect(jsonPath("$.data[%d].book.isbn13".formatted(i)).value(bookmarksDto.book().isbn13()))
-                    .andExpect(jsonPath("$.data[%d].book.title".formatted(i)).value(bookmarksDto.book().title()))
-                    .andExpect(jsonPath("$.data[%d].book.imageUrl".formatted(i)).value(bookmarksDto.book().imageUrl()))
-                    .andExpect(jsonPath("$.data[%d].book.publisher".formatted(i)).value(bookmarksDto.book().publisher()))
-                    .andExpect(jsonPath("$.data[%d].book.totalPage".formatted(i)).value(bookmarksDto.book().totalPage()))
-                    .andExpect(jsonPath("$.data[%d].book.avgRate".formatted(i)).value(bookmarksDto.book().avgRate()))
-                    .andExpect(jsonPath("$.data[%d].book.category".formatted(i)).value(bookmarksDto.book().category()))
+                    .andExpect(jsonPath("$.data[%d].id".formatted(i)).value(bookmarksDto.id))
+                    .andExpect(jsonPath("$.data[%d].bookId".formatted(i)).value(bookmarksDto.bookId))
+                    .andExpect(jsonPath("$.data[%d].readState".formatted(i)).value(bookmarksDto.readState))
+                    .andExpect(jsonPath("$.data[%d].readPage".formatted(i)).value(bookmarksDto.readPage))
+                    .andExpect(jsonPath("$.data[%d].readingRate".formatted(i)).value(bookmarksDto.readingRate))
+                    .andExpect(jsonPath("$.data[%d].createDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.createDate.toString().substring(0,18))))
+                    .andExpect(jsonPath("$.data[%d].book.id".formatted(i)).value(bookmarksDto.book.id))
+                    .andExpect(jsonPath("$.data[%d].book.isbn13".formatted(i)).value(bookmarksDto.book.isbn13))
+                    .andExpect(jsonPath("$.data[%d].book.title".formatted(i)).value(bookmarksDto.book.title))
+                    .andExpect(jsonPath("$.data[%d].book.imageUrl".formatted(i)).value(bookmarksDto.book.imageUrl))
+                    .andExpect(jsonPath("$.data[%d].book.publisher".formatted(i)).value(bookmarksDto.book.publisher))
+                    .andExpect(jsonPath("$.data[%d].book.totalPage".formatted(i)).value(bookmarksDto.book.totalPage))
+                    .andExpect(jsonPath("$.data[%d].book.avgRate".formatted(i)).value(bookmarksDto.book.avgRate))
+                    .andExpect(jsonPath("$.data[%d].book.category".formatted(i)).value(bookmarksDto.book.category))
 //                .andExpect(jsonPath("$.data[%d].book.authors".formatted(i)).value(bookmarksDto.book().authors()))
-                    .andExpect(jsonPath("$.data[%d].book.publishDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.book().publishDate().toString().substring(0,16))));
+                    .andExpect(jsonPath("$.data[%d].book.publishDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.book.publishDate.toString().substring(0,16))));
         }
     }
 
@@ -200,7 +202,7 @@ public class BookmarkControllerTest {
                 )
                 .andDo(print());
 
-        Page<BookmarkDto> bookmarksDtoPage = bookmarkService.toPage(member,0,10, "createDate,desc",null, null, null);
+        Page<BookmarkDto> bookmarksDtoPage = bookmarkService.toPage(member, PageRequest.of(0, 10, Sort.by("createDate").descending()), null, null, null);
 
         resultActions
                 .andExpect(handler().handlerType(BookmarkController.class))
@@ -216,20 +218,20 @@ public class BookmarkControllerTest {
         for(int i=0;i<bookmarksDtoPage.getContent().size(); i++) {
             BookmarkDto bookmarksDto = bookmarksDtoPage.getContent().get(i);
             resultActions
-                    .andExpect(jsonPath("$.data.data[%d].id".formatted(i)).value(bookmarksDto.id()))
-                    .andExpect(jsonPath("$.data.data[%d].bookId".formatted(i)).value(bookmarksDto.bookId()))
-                    .andExpect(jsonPath("$.data.data[%d].readState".formatted(i)).value(bookmarksDto.readState()))
-                    .andExpect(jsonPath("$.data.data[%d].readPage".formatted(i)).value(bookmarksDto.readPage()))
-                    .andExpect(jsonPath("$.data.data[%d].readingRate".formatted(i)).value(bookmarksDto.readingRate()))
-                    .andExpect(jsonPath("$.data.data[%d].createDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.createDate().toString().substring(0,18))))
-                    .andExpect(jsonPath("$.data.data[%d].book.id".formatted(i)).value(bookmarksDto.book().id()))
-                    .andExpect(jsonPath("$.data.data[%d].book.isbn13".formatted(i)).value(bookmarksDto.book().isbn13()))
-                    .andExpect(jsonPath("$.data.data[%d].book.title".formatted(i)).value(bookmarksDto.book().title()))
-                    .andExpect(jsonPath("$.data.data[%d].book.imageUrl".formatted(i)).value(bookmarksDto.book().imageUrl()))
-                    .andExpect(jsonPath("$.data.data[%d].book.publisher".formatted(i)).value(bookmarksDto.book().publisher()))
-                    .andExpect(jsonPath("$.data.data[%d].book.totalPage".formatted(i)).value(bookmarksDto.book().totalPage()))
-                    .andExpect(jsonPath("$.data.data[%d].book.avgRate".formatted(i)).value(bookmarksDto.book().avgRate()))
-                    .andExpect(jsonPath("$.data.data[%d].book.category".formatted(i)).value(bookmarksDto.book().category()));
+                    .andExpect(jsonPath("$.data.data[%d].id".formatted(i)).value(bookmarksDto.id))
+                    .andExpect(jsonPath("$.data.data[%d].bookId".formatted(i)).value(bookmarksDto.bookId))
+                    .andExpect(jsonPath("$.data.data[%d].readState".formatted(i)).value(bookmarksDto.readState))
+                    .andExpect(jsonPath("$.data.data[%d].readPage".formatted(i)).value(bookmarksDto.readPage))
+                    .andExpect(jsonPath("$.data.data[%d].readingRate".formatted(i)).value(bookmarksDto.readingRate))
+                    .andExpect(jsonPath("$.data.data[%d].createDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.createDate.toString().substring(0,18))))
+                    .andExpect(jsonPath("$.data.data[%d].book.id".formatted(i)).value(bookmarksDto.book.id))
+                    .andExpect(jsonPath("$.data.data[%d].book.isbn13".formatted(i)).value(bookmarksDto.book.isbn13))
+                    .andExpect(jsonPath("$.data.data[%d].book.title".formatted(i)).value(bookmarksDto.book.title))
+                    .andExpect(jsonPath("$.data.data[%d].book.imageUrl".formatted(i)).value(bookmarksDto.book.imageUrl))
+                    .andExpect(jsonPath("$.data.data[%d].book.publisher".formatted(i)).value(bookmarksDto.book.publisher))
+                    .andExpect(jsonPath("$.data.data[%d].book.totalPage".formatted(i)).value(bookmarksDto.book.totalPage))
+                    .andExpect(jsonPath("$.data.data[%d].book.avgRate".formatted(i)).value(bookmarksDto.book.avgRate))
+                    .andExpect(jsonPath("$.data.data[%d].book.category".formatted(i)).value(bookmarksDto.book.category));
 //                .andExpect(jsonPath("$.data.data[%d].book.authors".formatted(i)).value(bookmarksDto.book().authors()))
 //                    .andExpect(jsonPath("$.data.data[%d].book.publishDate".formatted(i)).value(Matchers.startsWith(bookmarksDto.book().publishDate().toString().substring(0,16))));
         }
