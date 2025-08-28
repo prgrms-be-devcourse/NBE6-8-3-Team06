@@ -50,8 +50,8 @@ public class NoteMockTest {
         Note note = new Note(null, "제목", "내용", "10", bookmark);
 
         // noteService mock 정의
-        given(noteService.findBookmarkById(bookmarkId)).willReturn(Optional.of(bookmark));
-        given(noteService.findNoteById(bookmark, noteId)).willReturn(Optional.of(note));
+//        given(noteService.findBookmarkById(bookmarkId)).willReturn(Optional.of(bookmark));
+//        given(noteService.findNoteById(bookmark, noteId)).willReturn(Optional.of(note));
 
         // when
         ResultActions resultActions = mvc

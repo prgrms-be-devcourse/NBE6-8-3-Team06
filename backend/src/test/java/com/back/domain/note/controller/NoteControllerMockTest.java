@@ -67,7 +67,7 @@ public class NoteControllerMockTest {
         );
 
         // Mock 동작 정의
-        when(noteService.findBookmarkById(bookmarkId)).thenReturn(Optional.of(bookmark));
+//        when(noteService.findBookmarkById(bookmarkId)).thenReturn(Optional.of(bookmark));
 
         // When
         ResultActions resultActions = mockMvc
