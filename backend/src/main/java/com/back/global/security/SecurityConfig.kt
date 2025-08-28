@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.*
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -15,53 +16,65 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
-@RequiredArgsConstructor
-class SecurityConfig {
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter? = null
+class SecurityConfig(
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+) {
+
+    companion object {
+        // 상수들을 compainion object로 정리
+        private val PUBLIC_ENDPOINTS = arrayOf(
+            "/user/login",
+            "/user/signup",
+            "/user/reissue",
+            "/api/categories"
+        )
+
+        private val ALLOWED_ORIGINS = listOf(
+            "http://localhost:3000",
+            "https://www.bookers.p-e.kr",
+            "https://bookers.p-e.kr"
+        )
+
+        private val ALLOWED_METHODS = listOf("GET", "POST", "PUT", "DELETE", "PATCH")
+    }
 
     @Bean
-    @Throws(Exception::class)
-    fun filterChain(http: HttpSecurity): SecurityFilterChain? {
-        http
-            .csrf(Customizer { csrf: CsrfConfigurer<HttpSecurity?>? -> csrf!!.disable() })
-            .cors(Customizer.withDefaults<CorsConfigurer<HttpSecurity?>?>())
-            .headers(Customizer { headers: HeadersConfigurer<HttpSecurity?>? -> headers!!.frameOptions(Customizer { frame: FrameOptionsConfig? -> frame.sameOrigin() }) })
-
-            .authorizeHttpRequests(Customizer { auth: AuthorizationManagerRequestMatcherRegistry? ->
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        return http
+            .csrf { it.disable() }
+            .cors { it.configurationSource(corsConfigurationSource()) }
+            .headers { headers ->
+                headers.frameOptions { it.sameOrigin() }
+            }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests{ auth ->
                 auth
-                    .requestMatchers("/user/login", "/user/signup", "/user/reissue").permitAll()
-                    .requestMatchers("/api/categories").permitAll()
+                    .requestMatchers(*PUBLIC_ENDPOINTS).permitAll()
                     .requestMatchers("/user/my").authenticated()
                     .anyRequest().permitAll()
             }
-            ) // jwt 인증필터 등록
+             // jwt 인증필터 등록
+            .addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter::class.java
+            )
+            .httpBasic{ it.disable() }
+            .formLogin{ it.disable() }
+            .logout { it.disable() }
+            .build()
 
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
-
-            .httpBasic(Customizer { httpBasic: HttpBasicConfigurer<HttpSecurity?>? -> httpBasic!!.disable() })
-            .formLogin(Customizer { formLogin: FormLoginConfigurer<HttpSecurity?>? -> formLogin!!.disable() })
-        http.logout(Customizer { logout: LogoutConfigurer<HttpSecurity?>? -> logout!!.disable() })
-
-        return http.build()
     }
 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
-        val config = CorsConfiguration()
-        config.setAllowedOrigins(
-            mutableListOf<String?>(
-                "http://localhost:3000",
-                "https://www.bookers.p-e.kr",
-                "https://bookers.p-e.kr"
-            )
-        ) // 프론트 도메인
-        config.setAllowedMethods(mutableListOf<String?>("GET", "POST", "PUT", "DELETE", "PATCH"))
-        config.setAllowedHeaders(mutableListOf<String?>("*"))
-        config.setAllowCredentials(true)
-
-        val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", config) // 모든 경로에 적용
-
-        return source
+        val configuration = CorsConfiguration().apply {
+            allowedOrigins = ALLOWED_ORIGINS
+            allowedMethods = ALLOWED_METHODS
+            allowedHeaders = listOf("*")
+            allowCredentials = true
+        }
+        return UrlBasedCorsConfigurationSource().apply {
+            registerCorsConfiguration("/**", configuration)
+        }
     }
 }

@@ -2,43 +2,54 @@ package com.back.global.standard.util
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import java.security.Key
 import java.util.*
+import javax.crypto.SecretKey
+
+private fun String.toSecretKey(): SecretKey = Keys.hmacShaKeyFor(this.toByteArray())
 
 class Ut {
     object jwt {
-        fun toString(secret: String, expirationSec: Int, body: MutableMap<String?, Any?>): String? {
-            val claimsBuilder = Jwts.claims()
 
-            for (entry in body.entries) {
-                claimsBuilder.add(entry.key, entry.value)
+        fun toString(
+            secret: String,
+            expirationSec: Int,
+            body: Map<String, Any>
+        ): String? {
+            return try{
+                val secretKey = secret.toSecretKey()
+                val now = Date()
+                val expiration = Date(now.time + expirationSec * 1000L )
+
+                val claims = Jwts.claims().apply {
+                    body.forEach { (key,value) -> add(key, value) }
+                }.build()
+
+                Jwts.builder()
+                    .claims(claims)
+                    .issuedAt(now)
+                    .expiration(expiration)
+                    .signWith(secretKey)
+                    .compact()
+            } catch (e: Exception){
+                null
             }
-            val claims = claimsBuilder.build()
-
-            val issueTime = Date()
-            val expirationTime = Date(issueTime.getTime() + expirationSec * 1000)
-
-            val jwtKey: Key = Keys.hmacShaKeyFor(secret.toByteArray())
-            val jwt = Jwts.builder()
-                .claims(claims)
-                .issuedAt(issueTime)
-                .expiration(expirationTime)
-                .signWith(jwtKey)
-                .compact()
-            return jwt
         }
 
         @JvmStatic
-        fun payload(secret: String, jwtStr: String?): MutableMap<String?, Any?>? {
-            val secretKey = Keys.hmacShaKeyFor(secret.toByteArray())
+        fun payload(secret: String, jwtStr: String?): Map<String, Any>? {
+            if(jwtStr.isNullOrBlank()) return null
 
-            try {
-                return Jwts
-                    .parser()
+            return try {
+                val secretKey = secret.toSecretKey()
+                val claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parse(jwtStr)
-                    .getPayload() as MutableMap<String?, Any?>?
+                    .parseSignedClaims(jwtStr)
+                    .payload
+
+                claims.entries
+                    .filter { it.key != null && it.value != null }
+                    .associate { it.key to it.value!! }
             } catch (e: Exception) {
                 return null
             }
@@ -46,19 +57,19 @@ class Ut {
 
         @JvmStatic
         fun isValid(secret: String, jwtStr: String?): Boolean {
-            val secretKey = Keys.hmacShaKeyFor(secret.toByteArray())
-            run {
-                try {
+            if(jwtStr.isNullOrBlank()) return false
+
+                return try {
+                    val secretKey = secret.toSecretKey()
                     Jwts
                         .parser()
                         .verifyWith(secretKey)
                         .build()
-                        .parse(jwtStr)
+                        .parseSignedClaims(jwtStr)
+                    true
                 } catch (e: Exception) {
                     return false
                 }
-                return true
-            }
         }
     }
 }
