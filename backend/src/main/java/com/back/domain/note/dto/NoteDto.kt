@@ -4,13 +4,12 @@ import com.back.domain.note.entity.Note
 import org.springframework.lang.NonNull
 import java.time.LocalDateTime
 
-@JvmRecord
 data class NoteDto(
-    @field:NonNull @param:NonNull val id: Int,
-    @field:NonNull @param:NonNull val createDate: LocalDateTime,
-    @field:NonNull @param:NonNull val modifyDate: LocalDateTime,
-    @field:NonNull @param:NonNull val title: String,
-    @field:NonNull @param:NonNull val content: String,
+    val id: Int,
+    val createDate: LocalDateTime,
+    val modifyDate: LocalDateTime,
+    val title: String,
+    val content: String,
     val page: String?
 ) {
     constructor(note: Note) : this(

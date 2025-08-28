@@ -20,7 +20,7 @@ class NoteService (
     private val noteRepository: NoteRepository,
     private val bookmarkRepository: BookmarkRepository
 ) {
-    fun findBookmarkById(id: Int): Bookmark? {
+    fun findBookmarkById(id: Int): Bookmark {
         return bookmarkRepository.findByIdOrNull(id)
             ?: throw NoSuchElementException("${id}번 북마크가 없습니다.")
     }
@@ -30,7 +30,7 @@ class NoteService (
             ?: throw NoSuchElementException("${bookmarkId}번 북마크가 없습니다.")
 
         val note = Note(member, title, content, page, bookmark)
-        bookmark.getNotes().add(note)
+        bookmark.notes.add(note)
 
         return note
     }
@@ -56,9 +56,9 @@ class NoteService (
             ?: throw NoSuchElementException("${id}번 노트가 존재하지 않습니다.")
     }
 
-    fun checkNotePageCURD(bookmark: Bookmark, actor: Member?, str: String, resultCode: String) {
+    fun checkNotePageCURD(bookmark: Bookmark, actor: Member, str: String, resultCode: String) {
         if (bookmark.member != actor) {
-            throw ServiceException(resultCode, "${bookmark.getId()}번 북마크의 노트 $str 권한이 없습니다.")
+            throw ServiceException(resultCode, "${bookmark.id}번 북마크의 노트 $str 권한이 없습니다.")
         }
     }
 
