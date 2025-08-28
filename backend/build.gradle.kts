@@ -44,6 +44,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+    kapt("org.projectlombok:lombok")
 
     // Kotlin & Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
