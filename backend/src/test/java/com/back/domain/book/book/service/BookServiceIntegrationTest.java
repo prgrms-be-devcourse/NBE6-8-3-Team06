@@ -133,13 +133,14 @@ class BookServiceIntegrationTest {
     void getBookByIsbn_WhenNotFoundInDB_ShouldFetchFromApiAndSaveToDatabase() {
         // Given
         // DB에서 해당 ISBN이 없음을 확인
-        bookRepository.findByIsbn13(TEST_ISBN).ifPresent(book -> {
+        Book existingBook = bookRepository.findByIsbn13(TEST_ISBN);
+        if (existingBook != null) {
             // 테스트를 위해 기존 데이터 삭제 (필요한 경우)
-            bookRepository.delete(book);
-        });
+            bookRepository.delete(existingBook);
+        }
 
-        Optional<Book> bookBeforeApi = bookRepository.findByIsbn13(TEST_ISBN);
-        assertThat(bookBeforeApi).isEmpty();
+        Book bookBeforeApi = bookRepository.findByIsbn13(TEST_ISBN);
+        assertThat(bookBeforeApi).isNull();
 
         // When
         BookSearchDto result = bookService.getBookByIsbn(TEST_ISBN);
@@ -150,10 +151,10 @@ class BookServiceIntegrationTest {
             assertThat(result.getIsbn13()).isEqualTo(TEST_ISBN);
 
             // DB에 저장되었는지 확인
-            Optional<Book> bookAfterApi = bookRepository.findByIsbn13(TEST_ISBN);
-            assertThat(bookAfterApi).isPresent();
+            Book bookAfterApi = bookRepository.findByIsbn13(TEST_ISBN);
+            assertThat(bookAfterApi).isNotNull();
 
-            Book savedBook = bookAfterApi.get();
+            Book savedBook = bookAfterApi;
             assertThat(savedBook.getTitle()).isEqualTo(result.getTitle());
             assertThat(savedBook.getPublisher()).isEqualTo(result.getPublisher());
 
@@ -197,10 +198,10 @@ class BookServiceIntegrationTest {
 
         if (result != null && !result.getAuthors().isEmpty()) {
             // Then
-            Optional<Book> bookOpt = bookRepository.findByIsbn13(TEST_ISBN);
-            assertThat(bookOpt).isPresent();
+            Book bookOpt = bookRepository.findByIsbn13(TEST_ISBN);
+            assertThat(bookOpt).isNotNull();
 
-            Book book = bookOpt.get();
+            Book book = bookOpt;
             List<Wrote> wroteRelations = book.getAuthors();
 
             // 작가 수가 일치하는지 확인
@@ -208,11 +209,11 @@ class BookServiceIntegrationTest {
 
             // 각 작가가 실제 Author 테이블에 저장되었고 관계가 올바른지 확인
             for (String authorName : result.getAuthors()) {
-                Optional<Author> authorOpt = authorRepository.findByName(authorName);
-                assertThat(authorOpt).isPresent();
+                Author authorOpt = authorRepository.findByName(authorName);
+                assertThat(authorOpt).isNotNull();
 
                 // 작가-책 관계가 존재하는지 확인
-                boolean relationExists = wroteRepository.existsByAuthorAndBook(authorOpt.get(), book);
+                boolean relationExists = wroteRepository.existsByAuthorAndBook(authorOpt, book);
                 assertThat(relationExists).isTrue();
             }
         }
@@ -222,10 +223,10 @@ class BookServiceIntegrationTest {
 
     private void verifyBookSavedCorrectly(BookSearchDto bookDto) {
         if (bookDto.getIsbn13() != null) {
-            Optional<Book> savedBook = bookRepository.findByIsbn13(bookDto.getIsbn13());
-            assertThat(savedBook).isPresent();
+            Book savedBook = bookRepository.findByIsbn13(bookDto.getIsbn13());
+            assertThat(savedBook).isNotNull();
 
-            Book book = savedBook.get();
+            Book book = savedBook;
             assertThat(book.getTitle()).isEqualTo(bookDto.getTitle());
             assertThat(book.getPublisher()).isEqualTo(bookDto.getPublisher());
         }

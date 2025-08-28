@@ -133,18 +133,18 @@ public class BookService {
     @Transactional
     public BookSearchDto getBookByIsbn(String isbn, Member member) {
         // 먼저 유효한 책(페이지 수 > 0)이 있는지 확인
-        Optional<Book> validBookFromDb = bookRepository.findValidBookByIsbn13(isbn);
+        Book validBookFromDb = bookRepository.findValidBookByIsbn13(isbn);
 
-        if (validBookFromDb.isPresent()) {
-            log.info("DB에서 유효한 책 발견: {}", validBookFromDb.get().getTitle());
-            return convertToDto(validBookFromDb.get(), member);
+        if (validBookFromDb != null) {
+            log.info("DB에서 유효한 책 발견: {}", validBookFromDb.getTitle());
+            return convertToDto(validBookFromDb, member);
         }
 
         // 유효한 책이 없다면 기존 책(페이지 수 0 포함)이 있는지 확인
-        Optional<Book> existingBookFromDb = bookRepository.findByIsbn13(isbn);
+        Book existingBookFromDb = bookRepository.findByIsbn13(isbn);
 
-        if (existingBookFromDb.isPresent()) {
-            Book existingBook = existingBookFromDb.get();
+        if (existingBookFromDb != null) {
+            Book existingBook = existingBookFromDb;
             log.info("DB에 페이지 수 0인 책이 있어서 상세 정보 보완 시도: {}", existingBook.getTitle());
 
             // 상세 정보 보완 시도
@@ -321,8 +321,8 @@ public class BookService {
 
         try {
             // 카테고리 존재 여부 확인
-            Optional<Category> categoryOptional = categoryRepository.findByName(categoryName);
-            if (categoryOptional.isEmpty()) {
+            Category category = categoryRepository.findByName(categoryName);
+            if (category == null) {
                 log.warn("존재하지 않는 카테고리: {}", categoryName);
                 return Page.empty(pageable);
             }
@@ -351,20 +351,20 @@ public class BookService {
         try {
             // 이미 존재하는 책인지 확인 (페이지 수와 관계없이)
             if (apiBook.getIsbn13() != null) {
-                Optional<Book> existingBook = bookRepository.findByIsbn13(apiBook.getIsbn13());
-                if (existingBook.isPresent()) {
+                Book existingBook = bookRepository.findByIsbn13(apiBook.getIsbn13());
+                if (existingBook != null) {
                     log.info("이미 존재하는 ISBN: {}", apiBook.getIsbn13());
-                    return existingBook.get();
+                    return existingBook;
                 }
             }
 
             // 카테고리 설정 먼저
             String categoryName = extractCategoryFromPath(apiBook.getCategoryName(), apiBook.getMallType());
-            Category category = categoryRepository.findByName(categoryName)
-                    .orElseGet(() -> {
-                        log.info("새 카테고리 생성: {}", categoryName);
-                        return categoryRepository.save(new Category(categoryName));
-                    });
+            Category category = categoryRepository.findByName(categoryName);
+            if (category == null) {
+                log.info("새 카테고리 생성: {}", categoryName);
+                category = categoryRepository.save(new Category(categoryName));
+            }
 
             // Book 엔티티 생성 (코틀린 생성자 사용)
             Book book = new Book(apiBook.getTitle(), apiBook.getPublisher(), category);
@@ -400,8 +400,10 @@ public class BookService {
         for (String authorName : authorNames) {
             try {
                 // 작가가 이미 존재하는지 확인
-                Author author = authorRepository.findByName(authorName)
-                        .orElseGet(() -> authorRepository.save(new Author(authorName)));
+                Author author = authorRepository.findByName(authorName);
+                if (author == null) {
+                    author = authorRepository.save(new Author(authorName));
+                }
 
                 // 이미 이 책과 작가의 관계가 존재하는지 확인
                 boolean relationExists = wroteRepository.existsByAuthorAndBook(author, book);
@@ -550,8 +552,8 @@ public class BookService {
 
         try {
             // 카테고리 존재 여부 확인
-            Optional<Category> categoryOptional = categoryRepository.findByName(categoryName);
-            if (categoryOptional.isEmpty()) {
+            Category category = categoryRepository.findByName(categoryName);
+            if (category == null) {
                 log.warn("존재하지 않는 카테고리: {}", categoryName);
                 return Page.empty(pageable);
             }

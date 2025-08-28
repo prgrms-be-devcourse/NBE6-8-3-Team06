@@ -23,7 +23,6 @@ import org.mockito.quality.Strictness;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -93,9 +92,9 @@ class BookServiceTest {
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("J.K. 롤링"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(authorRepository.save(any(Author.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
@@ -103,7 +102,7 @@ class BookServiceTest {
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -125,7 +124,7 @@ class BookServiceTest {
         String isbn = "9788966261024";
         Book book = createTestBookWithAuthor();
         when(bookRepository.findByIsbn13(isbn))
-                .thenReturn(Optional.of(book));
+                .thenReturn(book);
 
         // When
         BookSearchDto result = bookService.getBookByIsbn(isbn);
@@ -147,13 +146,13 @@ class BookServiceTest {
         AladinBookDto apiBook = createTestAladinBookDto();
 
         when(bookRepository.findByIsbn13(isbn))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(aladinApiClient.getBookByIsbn(isbn))
                 .thenReturn(apiBook);
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("J.K. 롤링"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(authorRepository.save(any(Author.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
@@ -210,15 +209,15 @@ class BookServiceTest {
         when(aladinApiClient.getBookDetails("9788966261024"))
                 .thenReturn(detailBook);
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13("9788966261024"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -244,15 +243,15 @@ class BookServiceTest {
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("J.K. 롤링"))
-                .thenReturn(Optional.of(testAuthor)); // 이미 존재하는 작가
+                .thenReturn(testAuthor); // 이미 존재하는 작가
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -305,15 +304,15 @@ class BookServiceTest {
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -347,17 +346,17 @@ class BookServiceTest {
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("새로운분야"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(categoryRepository.save(any(Category.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -394,15 +393,15 @@ class BookServiceTest {
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("외국도서"))
-                .thenReturn(Optional.of(new Category("외국도서")));
+                .thenReturn(new Category("외국도서"));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
