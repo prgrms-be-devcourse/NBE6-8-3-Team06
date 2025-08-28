@@ -59,8 +59,8 @@ class ReviewControllerTest(
     @DisplayName("리뷰 작성")
     @Throws(Exception::class)
     fun t1() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val accessToken = authTokenService.genAccessToken(member)
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val accessToken = authTokenService.genAccessToken(member)?: throw RuntimeException("해당 멤버에게 accessToken 발급 실패")
         val book = bookRepository.findAll().get(1)
         val resultActions = addReview(book.id, accessToken)
         val review =
@@ -82,8 +82,8 @@ class ReviewControllerTest(
     @DisplayName("리뷰 작성 여러번 - 실패")
     @Throws(Exception::class)
     fun t1_2() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val accessToken = authTokenService.genAccessToken(member)
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val accessToken = authTokenService.genAccessToken(member)?: throw RuntimeException("해당 멤버에게 accessToken 발급 실패")
         val book = bookRepository.findAll().get(1)
         val count = reviewService.count()
         addReview(book.id, accessToken)
@@ -101,8 +101,8 @@ class ReviewControllerTest(
     @DisplayName("리뷰 삭제")
     @Throws(Exception::class)
     fun t2() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val accessToken = authTokenService.genAccessToken(member)
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val accessToken = authTokenService.genAccessToken(member)?: throw RuntimeException("해당 멤버에게 accessToken 발급 실패")
         val book = bookRepository.findAll().get(1)
         addReview(book.id, accessToken)
         val review =
@@ -129,8 +129,8 @@ class ReviewControllerTest(
     @DisplayName("리뷰 수정")
     @Throws(Exception::class)
     fun t3() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val accessToken = authTokenService.genAccessToken(member)
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val accessToken = authTokenService.genAccessToken(member)?: throw RuntimeException("해당 멤버에게 accessToken 발급 실패")
         val book = bookRepository.findAll().get(1)
         addReview(book.id, accessToken)
         var review =
@@ -166,8 +166,8 @@ class ReviewControllerTest(
     @DisplayName("리뷰 조회")
     @Throws(Exception::class)
     fun t4() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val accessToken = authTokenService.genAccessToken(member)
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val accessToken = authTokenService.genAccessToken(member)?: throw RuntimeException("해당 멤버에게 accessToken 발급 실패")
         val book = bookRepository.findAll().get(1)
         addReview(book.id, accessToken)
         val review =
@@ -193,8 +193,8 @@ class ReviewControllerTest(
     @DisplayName("리뷰 조회 - 실패 (리뷰 없음)")
     @Throws(Exception::class)
     fun t4_2() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val accessToken = authTokenService.genAccessToken(member)
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val accessToken = authTokenService.genAccessToken(member)?: throw RuntimeException("해당 멤버에게 accessToken 발급 실패")
         val book = bookRepository.findAll().get(1)
 
         val resultActions = mvc.perform(

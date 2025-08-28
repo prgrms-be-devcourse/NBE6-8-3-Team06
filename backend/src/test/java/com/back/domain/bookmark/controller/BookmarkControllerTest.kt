@@ -46,7 +46,7 @@ class BookmarkControllerTest(
 
     @BeforeEach
     fun setup() {
-        var member = memberService.findByEmail("email@test.com").orElse(null)
+        var member = memberService.findByEmail("email@test.com")
         if (member == null) {
             member = memberService.join("testUser", "email@test.com", passwordEncoder.encode("password"))
         }
@@ -60,7 +60,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 추가")
     @Throws(Exception::class)
     fun t1() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val book = bookRepository.findById(3).get()
         val resultActions = mvc.perform(
@@ -89,7 +89,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 단건 조회")
     @Throws(Exception::class)
     fun t2() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc
             .perform(
@@ -148,7 +148,7 @@ class BookmarkControllerTest(
     @Throws(Exception::class)
     fun t3() {
         val id = Int.MAX_VALUE
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc
             .perform(
@@ -169,7 +169,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 다건 조회 - 목록")
     @Throws(Exception::class)
     fun t4() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc
             .perform(
@@ -246,7 +246,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 다건 조회 - 페이지")
     @Throws(Exception::class)
     fun t5() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc
             .perform(
@@ -338,7 +338,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 수정")
     @Throws(Exception::class)
     fun t6() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc.perform(
             MockMvcRequestBuilders.put("/bookmarks/" + id)
@@ -396,7 +396,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 삭제")
     @Throws(Exception::class)
     fun t7() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc
             .perform(
@@ -417,7 +417,7 @@ class BookmarkControllerTest(
     @DisplayName("북마크 내책 목록 상태 조회")
     @Throws(Exception::class)
     fun t8() {
-        val member = memberService.findByEmail("email@test.com").get()
+        val member = memberService.findByEmail("email@test.com")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val resultActions = mvc
             .perform(
