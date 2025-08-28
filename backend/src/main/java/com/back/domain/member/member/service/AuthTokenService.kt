@@ -3,60 +3,57 @@ package com.back.domain.member.member.service
 import com.back.domain.member.member.entity.Member
 import com.back.global.standard.util.Ut
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.stereotype.Service
 import java.util.Map
 
 @Service
-class AuthTokenService {
+class AuthTokenService(
     @Value("\${custom.jwt.secretKey}")
-    private val jwtSecretKey: String? = null
-
+    private val jwtSecretKey: String,
     @Value("\${custom.accessToken.expirationSeconds}")
-    private val accessTokenExpSec = 0
-
+    private val accessTokenExpSec: Int,
     @Value("\${custom.refreshToken.expirationSeconds}")
-    private val refreshTokenExpSec = 0
-
-    fun genAccessToken(member: Member): String? {
-        val id = member.getId()
-        val email: String = member.getEmail()
+    private val refreshTokenExpSec: Int
+) {
+   fun genAccessToken(member: Member): String? {
+        val payload = mapOf(
+            "id" to member.getId(),
+            "email" to member.getEmail()
+        )
 
         return Ut.jwt.toString(
             jwtSecretKey,
             accessTokenExpSec,
-            Map.of<String?, Any?>(
-                "id", id,
-                "email", email
-            )
+            payload
         )
     }
 
     fun genRefreshToken(member: Member): String? {
-        val id = member.getId()
-        val email: String = member.getEmail()
+        val payload = mapOf(
+            "id" to member.getId(),
+            "email" to member.getEmail()
+        )
 
         return Ut.jwt.toString(
             jwtSecretKey,
             refreshTokenExpSec,
-            Map.of<String?, Any?>(
-                "id", id,
-                "email", email
-            )
+            payload
         )
     }
 
 
-    fun payload(accessToken: String?): MutableMap<String?, Any?>? {
+    fun payload(accessToken: String): MutableMap<String, Any>? {
         val parsedPayload = Ut.jwt.payload(jwtSecretKey, accessToken)
+            ?: return null
 
-        if (parsedPayload == null) return null
-        val id = parsedPayload.get("id") as Int
-        val email = parsedPayload.get("email") as String
-
-        return Map.of<String?, Any?>("id", id, "email", email)
+        return mutableMapOf(
+            "id" to parsedPayload["id"] as Int,
+            "email" to parsedPayload["email"] as String
+        )
     }
 
-    fun isValid(accessToken: String?): Boolean {
+    fun isValid(accessToken: String): Boolean {
         return Ut.jwt.isValid(jwtSecretKey, accessToken)
     }
 }

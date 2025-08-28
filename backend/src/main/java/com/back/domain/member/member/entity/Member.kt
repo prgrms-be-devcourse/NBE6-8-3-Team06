@@ -8,8 +8,7 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.OneToMany
-import lombok.Getter
-import lombok.NoArgsConstructor
+
 
 @Entity
 class Member(
@@ -37,6 +36,7 @@ class Member(
     fun clearRefreshToken() {
         refreshToken = null
     }
+
     fun getEmail(): String {
         return email
     }

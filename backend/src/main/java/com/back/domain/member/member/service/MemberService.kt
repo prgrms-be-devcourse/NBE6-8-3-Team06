@@ -11,37 +11,38 @@ import java.util.*
 
 @Service
 @Transactional
-@RequiredArgsConstructor
-class MemberService {
-    private val memberRepository: MemberRepository? = null
-    private val passwordEncoder: PasswordEncoder? = null
-    private val authTokenService: AuthTokenService? = null
-
+class MemberService(
+    private val memberRepository: MemberRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val authTokenService: AuthTokenService
+) {
     fun save(member: Member): Member {
-        return memberRepository!!.save<Member>(member)
+        return memberRepository.save<Member>(member)
     }
 
     fun join(name: String, email: String, password: String): Member {
         val member = Member(name, email, password)
-        return memberRepository!!.save<Member>(member)
+        return memberRepository.save<Member>(member)
     }
 
-    fun findByEmail(email: String?): Optional<Member?>? {
-        return memberRepository!!.findByEmail(email)
+    fun findByEmail(email: String): Member? {
+        return memberRepository.findByEmail(email)
     }
 
-    fun checkPassword(member: Member, password: String?) {
-        if (!passwordEncoder!!.matches(password, member.getPassword())) {
+    fun checkPassword(member: Member, password: String) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw ServiceException("401-1", "비밀번호가 일치하지 않습니다.")
         }
     }
 
-    fun geneAccessToken(member: Member): String? {
-        return authTokenService!!.genAccessToken(member)
+    fun geneAccessToken(member: Member): String {
+        return authTokenService.genAccessToken(member)
+            ?: throw ServiceException("500", "액세스 토큰 생성에 실패했습니다.")
     }
 
-    fun geneRefreshToken(member: Member): String? {
-        val refreshToken = authTokenService!!.genRefreshToken(member)
+    fun geneRefreshToken(member: Member): String {
+        val refreshToken = authTokenService.genRefreshToken(member)
+            ?: throw ServiceException("500", "리프레시 토큰 생성에 실패했습니다.")
         member.updateRefreshToken(refreshToken)
         return refreshToken
     }
@@ -50,15 +51,15 @@ class MemberService {
         member.clearRefreshToken()
     }
 
-    fun isValidRefreshToken(refreshToken: String?): Boolean {
-        return authTokenService!!.isValid(refreshToken)
+    fun isValidRefreshToken(refreshToken: String): Boolean {
+        return authTokenService.isValid(refreshToken)
     }
 
-    fun getRefreshTokenPayload(refreshToken: String?): MutableMap<String?, Any?>? {
-        return authTokenService!!.payload(refreshToken)
+    fun getRefreshTokenPayload(refreshToken: String): Map<String, Any>? {
+        return authTokenService.payload(refreshToken)
     }
 
     fun deleteMember(member: Member) {
-        memberRepository!!.delete(member)
+        memberRepository.delete(member)
     }
 }
