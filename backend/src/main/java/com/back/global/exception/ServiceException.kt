@@ -1,19 +1,11 @@
-package com.back.global.exception;
+package com.back.global.exception
 
-import com.back.global.rsData.RsData;
-import lombok.Getter;
+import com.back.global.rsData.RsData
 
-@Getter
-public class ServiceException extends RuntimeException {
-    private String resultCode;
-    private String msg;
 
-    public ServiceException(String resultCode, String msg) {
-        super(resultCode+":"+msg);
-        this.resultCode = resultCode;
-        this.msg = msg;
-    }
-    public RsData<Void> getRsData() {
-        return new RsData<>(resultCode, msg, null);
-    }
+class ServiceException(private val resultCode: String, private val msg: String) : RuntimeException(
+    resultCode + ":" + msg
+) {
+    val rsData: RsData<Void>
+        get() = RsData(resultCode, msg, null)
 }
