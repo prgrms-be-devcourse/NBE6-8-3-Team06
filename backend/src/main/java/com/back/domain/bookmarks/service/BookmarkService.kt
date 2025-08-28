@@ -76,11 +76,11 @@ class BookmarkService(
         category: String?,
         state: String?,
         keyword: String?
-    ): Page<BookmarkDto?> {
+    ): Page<BookmarkDto> {
         val bookmarks: Page<Bookmark> = bookmarkRepository.search(member, category, state, keyword, pageable)
         //리뷰 포함 리스트 반환
         val dtoList = convertToBookmarkDtoList(bookmarks.getContent(), member)
-        return PageImpl<BookmarkDto>(dtoList, pageable, bookmarks.getTotalElements())
+        return PageImpl(dtoList, pageable, bookmarks.getTotalElements())
     }
 
     /**
@@ -234,11 +234,11 @@ class BookmarkService(
         bookmarks: MutableList<Bookmark>,
         member: Member
     ): MutableList<BookmarkDto> {
-        if (bookmarks == null || bookmarks.isEmpty()) {
+        if (bookmarks.isEmpty()) {
             return mutableListOf()
         }
         //사용자가 쓴 리뷰 전체 조회
-        val reviews: MutableList<Review> = reviewRepository!!.findAllByMember(member)
+        val reviews: MutableList<Review> = reviewRepository.findAllByMember(member)
         //Key : bookId, Value: review
         val reviewMap = reviews.stream().collect(
             Collectors.toMap(
@@ -253,7 +253,7 @@ class BookmarkService(
     }
 
     fun getLatestBookmark(member: Member): Bookmark {
-        return bookmarkRepository!!.getBookmarkByMemberOrderByIdDesc(member)
+        return bookmarkRepository.getBookmarkByMemberOrderByIdDesc(member)
             .orElseThrow<NoSuchElementException?>(Supplier { NoSuchElementException("조회가능한 북마크가 없습니다.") })
     }
 }

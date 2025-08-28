@@ -1,11 +1,10 @@
-package com.back.domain.bookmarks.dto;
+package com.back.domain.bookmarks.dto
 
-import com.back.domain.bookmarks.entity.Bookmark;
+import com.back.domain.bookmarks.entity.Bookmark
 
-public record BookmarkCreateResponseDto(
-        int id
+
+data class BookmarkCreateResponseDto(
+    val id: Int
 ) {
-    public BookmarkCreateResponseDto(Bookmark bookmark) {
-        this(bookmark.getId());
-    }
+    constructor(bookmark: Bookmark) : this(bookmark.id)
 }

@@ -1,8 +1,8 @@
-package com.back.domain.bookmarks.dto;
+package com.back.domain.bookmarks.dto
 
-public record ReadStateCount(
-        long READ,
-        long READING,
-        long WISH
-) {
-}
+
+data class ReadStateCount(
+    val READ: Long,
+    val READING: Long,
+    val WISH: Long
+)

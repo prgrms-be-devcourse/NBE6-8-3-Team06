@@ -1,15 +1,12 @@
-package com.back.domain.bookmarks.dto;
+package com.back.domain.bookmarks.dto
 
-import com.back.domain.bookmarks.entity.Bookmark;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.back.domain.bookmarks.entity.Bookmark
+import com.fasterxml.jackson.annotation.JsonUnwrapped
 
-public record BookmarkModifyResponseDto(
-        @JsonUnwrapped
-        BookmarkDto bookmark
+data class BookmarkModifyResponseDto(
+    @field:JsonUnwrapped @param:JsonUnwrapped val bookmark: BookmarkDto
 ) {
-    public BookmarkModifyResponseDto(Bookmark bookmark){
-        this(
-                new BookmarkDto(bookmark, null)
-        );
-    }
+    constructor(bookmark: Bookmark) : this(
+        BookmarkDto(bookmark, null)
+    )
 }

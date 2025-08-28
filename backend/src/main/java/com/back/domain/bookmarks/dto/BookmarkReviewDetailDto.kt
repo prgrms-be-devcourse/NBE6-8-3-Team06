@@ -1,21 +1,18 @@
-package com.back.domain.bookmarks.dto;
+package com.back.domain.bookmarks.dto
 
-import com.back.domain.review.review.entity.Review;
+import com.back.domain.review.review.entity.Review
+import java.time.LocalDateTime
 
-import java.time.LocalDateTime;
-
-public record BookmarkReviewDetailDto(
-        int id,
-        String content,
-        double rate,
-        LocalDateTime date
+data class BookmarkReviewDetailDto(
+    val id: Int,
+    val content: String,
+    val rate: Double,
+    val date: LocalDateTime
 ) {
-    public BookmarkReviewDetailDto(Review review){
-        this(
-                review.getId(),
-                review.getContent(),
-                review.getRate(),
-                review.getModifyDate()
-        );
-    }
+    constructor(review: Review) : this(
+        review.id,
+        review.content,
+        review.rate.toDouble(),
+        review.modifyDate
+    )
 }

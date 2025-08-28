@@ -1,11 +1,11 @@
-package com.back.domain.bookmarks.dto;
+package com.back.domain.bookmarks.dto
 
-import java.time.LocalDateTime;
+import java.time.LocalDateTime
 
-public record BookmarkModifyRequestDto(
-        String readState,
-        LocalDateTime startReadDate,
-        LocalDateTime endReadDate,
-        int readPage
-) {
-}
+
+data class BookmarkModifyRequestDto(
+    val readState: String,
+    val startReadDate: LocalDateTime?,
+    val endReadDate: LocalDateTime?,
+    val readPage: Int
+)

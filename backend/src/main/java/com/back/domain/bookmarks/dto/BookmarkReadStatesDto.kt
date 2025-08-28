@@ -1,9 +1,8 @@
-package com.back.domain.bookmarks.dto;
+package com.back.domain.bookmarks.dto
 
-public record BookmarkReadStatesDto(
-        long totalCount,
-        double avgRate,
-        ReadStateCount readState
-) {
 
-}
+data class BookmarkReadStatesDto(
+    val totalCount: Long,
+    val avgRate: Double,
+    val readState: ReadStateCount?
+)
