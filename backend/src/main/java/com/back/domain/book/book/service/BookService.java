@@ -358,24 +358,21 @@ public class BookService {
                 }
             }
 
-            // Book 엔티티 생성
-            Book book = new Book();
-            book.setTitle(apiBook.getTitle());
-            book.setImageUrl(apiBook.getImageUrl());
-            book.setPublisher(apiBook.getPublisher());
-            book.setIsbn13(apiBook.getIsbn13());
-            book.setTotalPage(apiBook.getTotalPage());
-            book.setPublishedDate(apiBook.getPublishedDate());
-            book.setAvgRate(0.0f);
-
-            // 카테고리 설정
+            // 카테고리 설정 먼저
             String categoryName = extractCategoryFromPath(apiBook.getCategoryName(), apiBook.getMallType());
             Category category = categoryRepository.findByName(categoryName)
                     .orElseGet(() -> {
                         log.info("새 카테고리 생성: {}", categoryName);
                         return categoryRepository.save(new Category(categoryName));
                     });
-            book.setCategory(category);
+
+            // Book 엔티티 생성 (코틀린 생성자 사용)
+            Book book = new Book(apiBook.getTitle(), apiBook.getPublisher(), category);
+            book.setImageUrl(apiBook.getImageUrl());
+            book.setIsbn13(apiBook.getIsbn13());
+            book.setTotalPage(apiBook.getTotalPage());
+            book.setPublishedDate(apiBook.getPublishedDate());
+            book.setAvgRate(0.0f);
 
             // 책 저장
             Book savedBook = bookRepository.save(book);

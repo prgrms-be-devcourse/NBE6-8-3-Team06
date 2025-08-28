@@ -52,7 +52,7 @@ public class BaseInitData {
         return args->{
             self.initBookData(); // 책 데이터 초기화
 //            self.initReviewData(); // 리뷰 테스트 시 주석 해제
-            self.initNoteData(); // Note 관련 데이터
+//            self.initNoteData(); // Note 관련 데이터
 //            self.initBookmarkData(); // Bookmark 데이터 초기화
         };
     }

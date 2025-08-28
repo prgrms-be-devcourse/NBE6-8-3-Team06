@@ -400,18 +400,15 @@ class BookServiceTest {
     // ===== Helper Methods =====
 
     private Book createTestBookWithAuthor() {
-        Book book = new Book();
-        book.setTitle("테스트 책");
+        Book book = new Book("테스트 책", "테스트 출판사", defaultCategory);
         book.setImageUrl("http://test.com/image.jpg");
-        book.setPublisher("테스트 출판사");
         book.setIsbn13("9788966261024");
         book.setTotalPage(300);
         book.setAvgRate(4.5f);
-        book.setCategory(defaultCategory);
 
         // 작가 관계 설정
         Wrote wrote = new Wrote(testAuthor, book);
-        book.getAuthors().add(wrote);
+        book.addAuthor(wrote);
 
         return book;
     }

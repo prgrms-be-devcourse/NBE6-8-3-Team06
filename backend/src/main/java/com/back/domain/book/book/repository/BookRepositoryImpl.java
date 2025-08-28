@@ -32,7 +32,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         return queryFactory
                 .selectFrom(book)
                 .distinct()
-                .leftJoin(book.authors, wrote)
+                .leftJoin(book._authors, wrote)
                 .leftJoin(wrote.author, author)
                 .where(titleContains(keyword).or(authorNameContains(keyword)))
                 .fetch();
@@ -43,7 +43,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         return queryFactory
                 .selectFrom(book)
                 .distinct()
-                .leftJoin(book.authors, wrote)
+                .leftJoin(book._authors, wrote)
                 .leftJoin(wrote.author, author)
                 .where(
                         isValidBook()
@@ -58,7 +58,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         List<Book> content = queryFactory
                 .selectFrom(book)
                 .distinct()
-                .leftJoin(book.authors, wrote).fetchJoin()
+                .leftJoin(book._authors, wrote).fetchJoin()
                 .leftJoin(wrote.author, author).fetchJoin()
                 .leftJoin(book.category, category).fetchJoin()
                 .where(
@@ -74,7 +74,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         Long total = queryFactory
                 .select(book.countDistinct())
                 .from(book)
-                .leftJoin(book.authors, wrote)
+                .leftJoin(book._authors, wrote)
                 .leftJoin(wrote.author, author)
                 .where(
                         isValidBook()
@@ -89,7 +89,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     public Page<Book> findAllValidBooks(Pageable pageable) {
         List<Book> content = queryFactory
                 .selectFrom(book)
-                .leftJoin(book.authors, wrote).fetchJoin()
+                .leftJoin(book._authors, wrote).fetchJoin()
                 .leftJoin(wrote.author, author).fetchJoin()
                 .leftJoin(book.category, category).fetchJoin()
                 .where(isValidBook())
@@ -111,7 +111,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     public Optional<Book> findValidBookByIsbn13(String isbn13) {
         Book result = queryFactory
                 .selectFrom(book)
-                .leftJoin(book.authors, wrote).fetchJoin()
+                .leftJoin(book._authors, wrote).fetchJoin()
                 .leftJoin(wrote.author, author).fetchJoin()
                 .leftJoin(book.category, category).fetchJoin()
                 .where(
@@ -127,7 +127,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     public Page<Book> findValidBooksByCategory(String categoryName, Pageable pageable) {
         List<Book> content = queryFactory
                 .selectFrom(book)
-                .leftJoin(book.authors, wrote).fetchJoin()
+                .leftJoin(book._authors, wrote).fetchJoin()
                 .leftJoin(wrote.author, author).fetchJoin()
                 .leftJoin(book.category, category).fetchJoin()
                 .where(
@@ -156,7 +156,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         List<Book> content = queryFactory
                 .selectFrom(book)
                 .distinct()
-                .leftJoin(book.authors, wrote).fetchJoin()
+                .leftJoin(book._authors, wrote).fetchJoin()
                 .leftJoin(wrote.author, author).fetchJoin()
                 .leftJoin(book.category, category).fetchJoin()
                 .where(
@@ -172,7 +172,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
         Long total = queryFactory
                 .select(book.countDistinct())
                 .from(book)
-                .leftJoin(book.authors, wrote)
+                .leftJoin(book._authors, wrote)
                 .leftJoin(wrote.author, author)
                 .where(
                         isValidBook()
