@@ -64,11 +64,11 @@ class Bookmark(
 
     fun calculateReadingRate(): Int {
         if (readState == ReadState.WISH) return 0
-        val totalPage = book.getTotalPage()
+        val totalPage = book.totalPage
         if (totalPage == 0) return 0
         if (readPage >= totalPage) return 100
         if (readPage <= 0) return 0
-        val rate = (readPage.toDouble() / totalPage) * 100
+        val rate = (readPage.toDouble() / totalPage.toDouble()) * 100
         return Math.round(rate).toInt()
     }
 

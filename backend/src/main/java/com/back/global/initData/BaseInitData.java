@@ -68,7 +68,10 @@ public class BaseInitData {
         }
         Book book = bookRepository.findAll().get(0); // 첫 번째 책을 가져옴
         for (int i = 1; i <= memberCount; i++) {
-            Member member = memberRepository.findByEmail("email" + i + "@a.a").orElseThrow(() -> new NoSuchElementException("멤버를 찾을 수 없습니다: "));
+            Member member = memberRepository.findByEmail("email" + i + "@a.a");
+            if (member == null) {
+                throw new NoSuchElementException("멤버를 찾을 수 없습니다: email" + i + "@a.a");
+            }
             Review review = new Review("리뷰 ㅋㅋ " + i, 5, member, book);
             reviewRepository.save(review);
         }
@@ -121,7 +124,15 @@ public class BaseInitData {
 
 
             memberRepository.save(new Member("리뷰쓰는놈", "asdf@asdf.com", "asdfasdfasdf"));
-            reviewRepository.save(new Review("리뷰리뷰", 5,memberRepository.findByEmail("asdf@asdf.com").orElseThrow(() -> new NoSuchElementException("멤버 못찾겠다요")), bookRepository.findById(1).orElseThrow(() -> new NoSuchElementException("책 못찾겠다요"))));
+            Member reviewMember = memberRepository.findByEmail("asdf@asdf.com");
+            if (reviewMember == null) {
+                throw new NoSuchElementException("멤버 못찾겠다요");
+            }
+            Book reviewBook = bookRepository.findById(1).orElse(null);
+            if (reviewBook == null) {
+                throw new NoSuchElementException("책 못찾겠다요");
+            }
+            reviewRepository.save(new Review("리뷰리뷰", 5, reviewMember, reviewBook));
 
         } catch (Exception e) {
             System.out.println("초기 데이터 로딩 중 오류 발생: " + e.getMessage());
@@ -184,13 +195,16 @@ public class BaseInitData {
     public void initBookmarkData(){
         if (bookmarkRepository.count() > 0) return;
         Member member;
-        if(memberRepository.findByEmail("email@test.com").isEmpty()) {
+        member = memberRepository.findByEmail("email@test.com");
+        if(member == null) {
             member = memberService.join("testUser", "email@test.com", passwordEncoder.encode("password"));
         }
-        member = memberRepository.findByEmail("email@test.com").get();
-        Book book1 = bookRepository.findById(1).get();
-        Book book2 = bookRepository.findById(2).get();
-        Book book3 = bookRepository.findById(3).get();
+        Book book1 = bookRepository.findById(1).orElse(null);
+        if (book1 == null) throw new RuntimeException("Book with ID 1 not found");
+        Book book2 = bookRepository.findById(2).orElse(null);
+        if (book2 == null) throw new RuntimeException("Book with ID 2 not found");
+        Book book3 = bookRepository.findById(3).orElse(null);
+        if (book3 == null) throw new RuntimeException("Book with ID 3 not found");
         Bookmark bookmark1 = bookmarkService.save(book1.getId(), member);
         Bookmark bookmark2 = bookmarkService.save(book2.getId(), member);
         bookmarkService.save(book3.getId(), member);

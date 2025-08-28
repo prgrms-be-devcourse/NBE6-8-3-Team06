@@ -68,7 +68,8 @@ class ReviewRecommendService(
         }
     }
 
-    fun isRecommended(review: Review, member: Member): Boolean? {
+    fun isRecommended(review: Review, member: Member?): Boolean? {
+        if (member == null) return null
         return reviewRecommendRepository.findByReviewAndMember(review, member)
             .map(ReviewRecommend::isRecommended)
             .orElse(null)

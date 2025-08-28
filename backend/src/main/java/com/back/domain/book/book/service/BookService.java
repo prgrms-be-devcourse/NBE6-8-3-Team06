@@ -260,7 +260,7 @@ public class BookService {
                     book.getTotalPage(),
                     book.getPublishedDate(),
                     book.getAvgRate(),
-                    book.getCategory().getName(),
+                    book.getCategory() != null ? book.getCategory().getName() : null,
                     book.getAuthors().stream()
                             .map(wrote -> wrote.getAuthor().getName())
                             .toList(),
@@ -649,17 +649,17 @@ public class BookService {
      * Review 엔티티를 DTO로 변환
      */
     private ReviewResponseDto convertReviewToDto(Review review, Member member) {
-        return ReviewResponseDto.builder()
-                .id(review.getId())
-                .content(review.getContent())
-                .rate(review.getRate())
-                .memberName(review.getMember().getName())
-                .memberId(review.getMember().getId())
-                .likeCount(review.getLikeCount())
-                .dislikeCount(review.getDislikeCount())
-                .isRecommended(reviewRecommendService.isRecommended(review, member))
-                .createdDate(review.getCreateDate())
-                .modifiedDate(review.getModifyDate())
-                .build();
+        return new ReviewResponseDto(
+                review.getId(),
+                review.getContent(),
+                review.getRate(),
+                review.getMember().getName(),
+                review.getMember().getId(),
+                review.getLikeCount(),
+                review.getDislikeCount(),
+                reviewRecommendService.isRecommended(review, member),
+                review.getCreateDate(),
+                review.getModifyDate()
+        );
     }
 }

@@ -51,8 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Map<String,Object> payload = Ut.jwt.payload(secretKey,token);
             String email = (String) payload.get("email");
 
-            Member member = memberRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+            Member member = memberRepository.findByEmail(email);
+            if (member == null) {
+                throw new RuntimeException("사용자 정보를 찾을 수 없습니다.");
+            }
 
             UserDetails userDetails = new SecurityUser(member);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
