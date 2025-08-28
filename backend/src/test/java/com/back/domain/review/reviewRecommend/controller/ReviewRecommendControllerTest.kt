@@ -105,7 +105,7 @@ class ReviewRecommendControllerTest(
     @DisplayName("리뷰 추천하기 - 성공")
     @Throws(Exception::class)
     fun t1() {
-        val member = memberService.findByEmail("email1@a.a").get()
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessToken)
@@ -129,10 +129,10 @@ class ReviewRecommendControllerTest(
     @DisplayName("리뷰 여러명이 추천하기 - 성공")
     @Throws(Exception::class)
     fun t2() {
-        val member = memberService.findByEmail("email1@a.a").get()
-        val member2 = memberService.findByEmail("email2@a.a").get()
-        val member3 = memberService.findByEmail("email3@a.a").get()
-        val member4 = memberService.findByEmail("email4@a.a").get()
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val member2 = memberService.findByEmail("email2@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val member3 = memberService.findByEmail("email3@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
+        val member4 = memberService.findByEmail("email4@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val accessToken2 = memberService.geneAccessToken(member2)
         val accessToken3 = memberService.geneAccessToken(member3)
@@ -177,7 +177,7 @@ class ReviewRecommendControllerTest(
     @DisplayName("리뷰 추천하기 - 실패 (이미 추천한 리뷰)")
     @Throws(Exception::class)
     fun t3() {
-        val member = memberService.findByEmail("email1@a.a").get()
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessToken)
@@ -204,7 +204,7 @@ class ReviewRecommendControllerTest(
     @DisplayName("없는 리뷰 추천하기 - 실패")
     @Throws(Exception::class)
     fun t4() {
-        val member = memberService.findByEmail("email1@a.a").get()
+        val member = memberService.findByEmail("email1@a.a")?:throw IllegalArgumentException("해당 이메일의 멤버가 없음")
         val accessToken = memberService.geneAccessToken(member)
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessToken)
