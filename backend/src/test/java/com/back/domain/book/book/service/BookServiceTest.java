@@ -18,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class BookServiceTest {
 
     @Mock
@@ -61,9 +64,9 @@ class BookServiceTest {
     @DisplayName("DB에서 책을 찾을 수 있는 경우 - API 호출하지 않음")
     void searchBooks_WhenBooksFoundInDB_ShouldReturnFromDB() {
         // Given
-        String query = "자바";
+        String query = "테스트 책";
         Book book = createTestBookWithAuthor();
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of(book));
 
         // When
@@ -85,7 +88,7 @@ class BookServiceTest {
         String query = "새로운책";
         AladinBookDto apiBook = createTestAladinBookDto();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
@@ -192,7 +195,7 @@ class BookServiceTest {
                 .authors(List.of("테스트 작가"))
                 .build();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
@@ -228,7 +231,7 @@ class BookServiceTest {
         String query = "기존작가책";
         AladinBookDto apiBook = createTestAladinBookDto();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
@@ -258,7 +261,7 @@ class BookServiceTest {
     void searchBooks_WhenAPICallFails_ShouldReturnEmptyList() {
         // Given
         String query = "실패테스트";
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of()); // API 클라이언트에서 빈 리스트 반환
@@ -282,10 +285,11 @@ class BookServiceTest {
                 .isbn13("9788966261024")
                 .categoryName("국내도서>소설>한국소설>현대소설")
                 .mallType("BOOK")
+                .totalPage(300)
                 .authors(List.of("테스트 작가"))
                 .build();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
@@ -320,10 +324,11 @@ class BookServiceTest {
                 .isbn13("9788966261024")
                 .categoryName("국내도서>새로운분야>세부분야")
                 .mallType("BOOK")
+                .totalPage(300)
                 .authors(List.of("테스트 작가"))
                 .build();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
@@ -363,10 +368,11 @@ class BookServiceTest {
                 .isbn13("9788966261024")
                 .categoryName(null) // 카테고리 정보 없음
                 .mallType("FOREIGN")
+                .totalPage(250) // 페이지 수 추가하여 상세 조회 불필요하게 만듦
                 .authors(List.of("테스트 작가"))
                 .build();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));

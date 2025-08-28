@@ -1,10 +1,7 @@
 package com.back.domain.book.category.controller;
 
 import com.back.domain.book.category.dto.CategoryDto;
-import com.back.domain.book.category.entity.Category;
 import com.back.domain.book.category.service.CategoryService;
-import com.back.domain.bookmarks.controller.BookmarkController;
-import com.back.domain.bookmarks.dto.BookmarkReadStatesDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,7 +33,7 @@ public class CategoryControllerTest {
     void t1() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        get("/api/categories")
+                        get("/categories")
                 )
                 .andDo(print());
         List<CategoryDto> categories = categoryService.getCategories();
