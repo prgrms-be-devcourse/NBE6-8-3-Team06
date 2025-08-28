@@ -179,21 +179,29 @@ class BookServiceTest {
     void enrichMissingDetails_WhenPageMissing_ShouldEnrichFromAPI() {
         // Given
         String query = "페이지없는책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("페이지 없는 책")
-                .isbn13("9788966261024")
-                .totalPage(0) // 페이지 수 없음
-                .authors(List.of("테스트 작가"))
-                .categoryName("국내도서>소설")
-                .mallType("BOOK")
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "페이지 없는 책", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                0, // totalPage - 페이지 수 없음
+                null, // publishedDate
+                "국내도서>소설", // categoryName
+                "BOOK", // mallType
+                List.of("테스트 작가") // authors
+        );
 
-        AladinBookDto detailBook = AladinBookDto.builder()
-                .title("페이지 없는 책")
-                .isbn13("9788966261024")
-                .totalPage(300) // 상세 조회에서 페이지 수 있음
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto detailBook = new AladinBookDto(
+                "페이지 없는 책", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                300, // totalPage - 상세 조회에서 페이지 수 있음
+                null, // publishedDate
+                null, // categoryName
+                null, // mallType
+                List.of("테스트 작가") // authors
+        );
 
         when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
@@ -280,14 +288,17 @@ class BookServiceTest {
     void categoryExtraction_ShouldExtractSecondLevel_Novel() {
         // Given
         String query = "소설책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("Test Novel")
-                .isbn13("9788966261024")
-                .categoryName("국내도서>소설>한국소설>현대소설")
-                .mallType("BOOK")
-                .totalPage(300)
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "Test Novel", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                300, // totalPage
+                null, // publishedDate
+                "국내도서>소설>한국소설>현대소설", // categoryName
+                "BOOK", // mallType
+                List.of("테스트 작가") // authors
+        );
 
         when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
@@ -319,14 +330,17 @@ class BookServiceTest {
     void categoryExtraction_ShouldCreateNewCategory() {
         // Given
         String query = "새분야책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("Test Book")
-                .isbn13("9788966261024")
-                .categoryName("국내도서>새로운분야>세부분야")
-                .mallType("BOOK")
-                .totalPage(300)
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "Test Book", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                300, // totalPage
+                null, // publishedDate
+                "국내도서>새로운분야>세부분야", // categoryName
+                "BOOK", // mallType
+                List.of("테스트 작가") // authors
+        );
 
         when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
@@ -363,14 +377,17 @@ class BookServiceTest {
     void categoryExtraction_ForeignBook_ShouldUseForeignCategory() {
         // Given
         String query = "외국책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("Foreign Book")
-                .isbn13("9788966261024")
-                .categoryName(null) // 카테고리 정보 없음
-                .mallType("FOREIGN")
-                .totalPage(250) // 페이지 수 추가하여 상세 조회 불필요하게 만듦
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "Foreign Book", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                250, // totalPage - 페이지 수 추가하여 상세 조회 불필요하게 만듦
+                null, // publishedDate
+                null, // categoryName - 카테고리 정보 없음
+                "FOREIGN", // mallType
+                List.of("테스트 작가") // authors
+        );
 
         when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
@@ -414,16 +431,16 @@ class BookServiceTest {
     }
 
     private AladinBookDto createTestAladinBookDto() {
-        return AladinBookDto.builder()
-                .title("해리 포터와 마법사의 돌")
-                .imageUrl("http://image.aladin.co.kr/test.jpg")
-                .publisher("문학수첩")
-                .isbn13("9788966261024")
-                .totalPage(250)
-                .publishedDate(LocalDateTime.of(2024, 1, 15, 0, 0))
-                .categoryName("국내도서>소설>판타지소설")
-                .mallType("BOOK")
-                .authors(List.of("J.K. 롤링"))
-                .build();
+        return new AladinBookDto(
+                "해리 포터와 마법사의 돌", // title
+                "http://image.aladin.co.kr/test.jpg", // imageUrl
+                "문학수첩", // publisher
+                "9788966261024", // isbn13
+                250, // totalPage
+                LocalDateTime.of(2024, 1, 15, 0, 0), // publishedDate
+                "국내도서>소설>판타지소설", // categoryName
+                "BOOK", // mallType
+                List.of("J.K. 롤링") // authors
+        );
     }
 }
