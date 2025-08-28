@@ -48,7 +48,7 @@ public class CategoryControllerTest {
         for(int i=0; i< categories.size(); i++){
             CategoryDto category = categories.get(i);
             resultActions
-                    .andExpect(jsonPath("$.data[%d].name".formatted(i)).value(category.name()));
+                    .andExpect(jsonPath("$.data[%d].name".formatted(i)).value(category.getName()));
         }
     }
 }

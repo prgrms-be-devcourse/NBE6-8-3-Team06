@@ -251,22 +251,22 @@ public class BookService {
                 readState = getReadStateByMemberAndBook(member, book);
             }
 
-            return BookDetailDto.builder()
-                    .id(book.getId())
-                    .title(book.getTitle())
-                    .imageUrl(book.getImageUrl())
-                    .publisher(book.getPublisher())
-                    .isbn13(book.getIsbn13())
-                    .totalPage(book.getTotalPage())
-                    .publishedDate(book.getPublishedDate())
-                    .avgRate(book.getAvgRate())
-                    .categoryName(book.getCategory().getName())
-                    .authors(book.getAuthors().stream()
+            return new BookDetailDto(
+                    book.getId(),
+                    book.getTitle(),
+                    book.getImageUrl(),
+                    book.getPublisher(),
+                    book.getIsbn13(),
+                    book.getTotalPage(),
+                    book.getPublishedDate(),
+                    book.getAvgRate(),
+                    book.getCategory().getName(),
+                    book.getAuthors().stream()
                             .map(wrote -> wrote.getAuthor().getName())
-                            .toList())
-                    .readState(readState)
-                    .reviews(reviewPageResponse)
-                    .build();
+                            .toList(),
+                    readState,
+                    reviewPageResponse
+            );
 
         } catch (Exception e) {
             log.error("책 상세 조회 중 오류 발생: {}", e.getMessage());
@@ -628,21 +628,21 @@ public class BookService {
      * 단일 Book 엔티티를 DTO로 변환 (ReadState 직접 전달)
      */
     private BookSearchDto convertToDto(Book book, ReadState readState) {
-        return BookSearchDto.builder()
-                .id(book.getId())
-                .title(book.getTitle())
-                .imageUrl(book.getImageUrl())
-                .publisher(book.getPublisher())
-                .isbn13(book.getIsbn13())
-                .totalPage(book.getTotalPage())
-                .publishedDate(book.getPublishedDate())
-                .avgRate(book.getAvgRate())
-                .categoryName(book.getCategory().getName())
-                .authors(book.getAuthors().stream()
+        return new BookSearchDto(
+                book.getId(),
+                book.getTitle(),
+                book.getImageUrl(),
+                book.getPublisher(),
+                book.getIsbn13(),
+                book.getTotalPage(),
+                book.getPublishedDate(),
+                book.getAvgRate(),
+                book.getCategory().getName(),
+                book.getAuthors().stream()
                         .map(wrote -> wrote.getAuthor().getName())
-                        .toList())
-                .readState(readState)
-                .build();
+                        .toList(),
+                readState
+        );
     }
 
     /**

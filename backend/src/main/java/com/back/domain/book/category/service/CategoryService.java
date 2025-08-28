@@ -13,6 +13,8 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     public List<CategoryDto> getCategories() {
-        return categoryRepository.findAll().stream().map(CategoryDto::new).toList();
+        return categoryRepository.findAll().stream()
+                .map(CategoryDto::from)
+                .toList();
     }
 }
