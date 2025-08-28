@@ -1,25 +1,21 @@
-package com.back.global.dto;
+package com.back.global.dto
 
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Page
 
-import java.util.List;
-
-public record PageResponseDto<T>(
-        List<T> data,
-        int pageNumber,
-        int pageSize,
-        int totalPages,
-        long totalElements,
-        boolean isLast
+data class PageResponseDto<T>(
+    val data: MutableList<T>,
+    val pageNumber: Int,
+    val pageSize: Int,
+    val totalPages: Int,
+    val totalElements: Long,
+    val isLast: Boolean
 ) {
-    public PageResponseDto(Page<T> page) {
-        this(
-                page.getContent(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalPages(),
-                page.getTotalElements(),
-                page.isLast()
-        );
-    }
+    constructor(page: Page<T>) : this(
+        page.getContent(),
+        page.getNumber(),
+        page.getSize(),
+        page.getTotalPages(),
+        page.getTotalElements(),
+        page.isLast()
+    )
 }

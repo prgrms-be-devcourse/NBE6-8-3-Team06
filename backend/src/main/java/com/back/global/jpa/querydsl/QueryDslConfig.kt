@@ -1,15 +1,14 @@
-package com.back.global.jpa.querydsl;
+package com.back.global.jpa.querydsl
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.querydsl.jpa.impl.JPAQueryFactory
+import jakarta.persistence.EntityManager
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
 @Configuration
-public class QueryDslConfig {
-
+class QueryDslConfig {
     @Bean
-    public JPAQueryFactory jpaQueryFactory(EntityManager entityManager) {
-        return new JPAQueryFactory(entityManager);
+    fun jpaQueryFactory(entityManager: EntityManager): JPAQueryFactory {
+        return JPAQueryFactory(entityManager)
     }
 }
