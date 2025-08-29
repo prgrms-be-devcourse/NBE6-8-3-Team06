@@ -65,7 +65,7 @@ export default function Page() {
         }),
         getBookmarkReadStates({
           category: selectedCategory,
-          readState: undefined,
+          readState: null,
           keyword: debouncedSearchKeyword,
         }),
       ]);

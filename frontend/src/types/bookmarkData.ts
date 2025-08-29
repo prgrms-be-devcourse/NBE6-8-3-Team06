@@ -70,8 +70,8 @@ export type CreateBookmark = {
 
 export type UpdateBookmark = {
     readState: string;
-    startReadDate: string;
-    endReadDate: string;
+    startReadDate: string | null;
+    endReadDate: string | null;
     readPage: number;
 };
 
@@ -84,4 +84,19 @@ export type ReadState = {
     READ: number;
     READING: number;
     WISH: number;
+}
+
+export type BookmarkSearch = {
+    page: number,
+    size: number,
+    sort: string,
+    category: string | null,
+    readState: string| null,
+    keyword: string| null
+}
+
+export type BookmarkReadStateSearch = {
+    category: string|null,
+    readState: string|null,
+    keyword: string|null
 }

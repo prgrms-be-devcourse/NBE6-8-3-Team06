@@ -93,8 +93,35 @@ export function BookmarkEditForm({ bookmark, onSave, onCancel }: BookmarkEditFor
                             <SelectItem value="READ">읽은 책</SelectItem>
                         </SelectContent>
                     </Select>
+                    <div className="flex gap-4">
+                        {(formData.readState === 'READING' || formData.readState === 'READ') && (
+                            <div className="space-y-2">
+                                <Label htmlFor="dateStarted">시작일</Label>
+                                <Input
+                                    id="startReadDate"
+                                    type="date"
+                                    value={formData.startReadDate || ''}
+                                    onChange={(e) => handleValueChange('startReadDate', e.target.value)}
+                                    min={bookmark.book.publishDate?.substring(0,10) || undefined}
+                                    max={formData.endReadDate || today}
+                                />
+                            </div>
+                        )}
+                        {formData.readState === 'READ' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="dateFinished">완독일</Label>
+                                <Input
+                                    id="endReadDate"
+                                    type="date"
+                                    value={formData.endReadDate || ''}
+                                    onChange={(e) => handleValueChange('endReadDate', e.target.value)}
+                                    min={formData.startReadDate || undefined}
+                                    max={today}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
-
                 {formData.readState === 'READING' && (
                     <div className="space-y-2">
                         <Label htmlFor="currentPage">현재 페이지</Label>
@@ -107,38 +134,7 @@ export function BookmarkEditForm({ bookmark, onSave, onCancel }: BookmarkEditFor
                         />
                     </div>
                 )}
-
-                {formData.readState === 'READ' && (
-                    <>
-                        <div className="space-y-2">
-                            <Label htmlFor="dateFinished">완독일</Label>
-                            <Input
-                                id="endReadDate"
-                                type="date"
-                                value={formData.endReadDate || ''}
-                                onChange={(e) => handleValueChange('endReadDate', e.target.value)}
-                                min={formData.startReadDate || undefined}
-                                max={today}
-                            />
-                        </div>
-                    </>
-                )}
             </div>
-
-            {(formData.readState === 'READING' || formData.readState === 'READ') && (
-                <div className="space-y-2">
-                    <Label htmlFor="dateStarted">시작일</Label>
-                    <Input
-                        id="startReadDate"
-                        type="date"
-                        value={formData.startReadDate || ''}
-                        onChange={(e) => handleValueChange('startReadDate', e.target.value)}
-                        min={bookmark.book.publishDate?.substring(0,10) || undefined}
-                        max={formData.endReadDate || today}
-                    />
-                </div>
-            )}
-
             <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={onCancel}>
                     취소
