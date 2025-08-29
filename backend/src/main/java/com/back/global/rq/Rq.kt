@@ -33,6 +33,7 @@ class Rq(
             ?.let { it as? SecurityUser }
             ?.member
 
+
     fun getAuthenticatedActor(): Member = actor
             ?: throw IllegalStateException("인증된 사용자 정보를 찾을 수 없습니다")
 

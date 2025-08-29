@@ -52,7 +52,7 @@ class BookController(
         pageable: Pageable,
         request: HttpServletRequest? = null
     ): RsData<PageResponseDto<BookSearchDto>> {
-        val member = rq.getActor()
+        val member = rq.actor
 
         member?.let {
             logger.debug("로그인된 사용자로 책 조회: ${it.getEmail()}")
@@ -75,7 +75,7 @@ class BookController(
         request: HttpServletRequest? = null
     ): RsData<PageResponseDto<BookSearchDto>> {
         val validQuery = query.validateAndTrim("400-6", "검색어를 입력해주세요.")
-        val member = rq.getActor()
+        val member = rq.actor
 
         val books = bookService.searchBooks(validQuery, pageable, member)
         val pageResponse = PageResponseDto(books)
@@ -94,7 +94,7 @@ class BookController(
         request: HttpServletRequest? = null
     ): RsData<BookSearchDto?> {
         val cleanIsbn = isbn.validateAndCleanIsbn()
-        val member = rq.getActor()
+        val member = rq.actor
 
         val book = bookService.getBookByIsbn(cleanIsbn, member)
 
@@ -110,7 +110,7 @@ class BookController(
         @PageableDefault(size = 10, sort = ["id"], direction = Sort.Direction.DESC)
         pageable: Pageable
     ): RsData<BookDetailDto?> {
-        val member = rq.getActor()
+        val member = rq.actor
         val bookDetail = bookService.getBookDetailById(id, pageable, member)
 
         return bookDetail?.let {
@@ -127,7 +127,7 @@ class BookController(
         request: HttpServletRequest? = null
     ): RsData<PageResponseDto<BookSearchDto>> {
         val validCategoryName = categoryName.validateAndTrim("400-9", "카테고리 이름을 입력해주세요.")
-        val member = rq.getActor()
+        val member = rq.actor
 
         member?.let {
             logger.debug("로그인된 사용자로 카테고리별 책 조회: ${it.getEmail()} - $validCategoryName")
@@ -155,7 +155,7 @@ class BookController(
     ): RsData<PageResponseDto<BookSearchDto>> {
         val validQuery = query.validateAndTrim("400-6", "검색어를 입력해주세요.")
         val validCategoryName = categoryName.validateAndTrim("400-9", "카테고리 이름을 입력해주세요.")
-        val member = rq.getActor()
+        val member = rq.actor
 
         member?.let {
             logger.debug(

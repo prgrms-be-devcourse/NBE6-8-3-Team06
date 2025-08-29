@@ -28,7 +28,7 @@ class BookmarkController(
     @PostMapping
     @Transactional
     fun addBookmark(@RequestBody bookmarkCreateRequestDto: BookmarkCreateRequestDto): RsData<Void> {
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         bookmarkService.save(bookmarkCreateRequestDto.bookId, member)
         return RsData(
             "201-1",
@@ -45,7 +45,7 @@ class BookmarkController(
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     fun getBookmark(@PathVariable id: Int): RsData<BookmarkDetailDto> {
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         val bookmark = bookmarkService.getBookmarkById(member, id)
         return RsData("200-1", "${id}번 조회 성공", bookmark)
     }
@@ -58,7 +58,7 @@ class BookmarkController(
          * @return {"resultCode": string, "msg": string, "data": {[bookmarkDto]}}
          */
         get() {
-            val member = rq.getActor()
+            val member = rq.getAuthenticatedActor()
             val bookmarks: MutableList<BookmarkDto> = bookmarkService.toList(member)
             if (bookmarks.isEmpty()) {
                 return RsData("404-1", "데이터가 없습니다.", null)
@@ -83,7 +83,7 @@ class BookmarkController(
         @RequestParam(value = "readState", required = false) read_state: String?,
         @RequestParam(value = "keyword", required = false) keyword: String?
     ): RsData<PageResponseDto<BookmarkDto>> {
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         val bookmarkDtoPage = bookmarkService.toPage(member, pageable, category, read_state, keyword)
         if (bookmarkDtoPage.isEmpty()) {
             return RsData("404-1", "데이터가 없습니다.", null)
@@ -107,7 +107,7 @@ class BookmarkController(
         @PathVariable id: Int,
         @RequestBody bookmarkModifyRequestDto: BookmarkModifyRequestDto
     ): RsData<BookmarkModifyResponseDto> {
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         val bookmark = bookmarkService.modifyBookmark(
             member,
             id,
@@ -131,7 +131,7 @@ class BookmarkController(
     @DeleteMapping("/{id}")
     @Transactional
     fun deleteBookmark(@PathVariable id: Int): RsData<Void> {
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         bookmarkService.deleteBookmark(member, id)
         return RsData("200-1", "${id} 북마크가 삭제되었습니다.", null)
     }
@@ -147,7 +147,7 @@ class BookmarkController(
         @RequestParam(value = "readState", required = false) read_state: String?,
         @RequestParam(value = "keyword", required = false) keyword: String?
     ): RsData<BookmarkReadStatesDto?> {
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         val bookmarkReadStatesDto = bookmarkService.getReadStatesCount(member, category, read_state, keyword)
         return RsData<BookmarkReadStatesDto?>("200-1", "조회 성공", bookmarkReadStatesDto)
     }

@@ -31,7 +31,7 @@ class ReviewController(
     fun getReview(@PathVariable("book_id") bookId: Int): RsData<ReviewResponseDto> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.getActor()
+        val member: Member? = rq.actor
         if (member == null) {
             return RsData("401-1", "Unauthorized access")
         }
@@ -51,7 +51,7 @@ class ReviewController(
     ): RsData<PageResponseDto<ReviewResponseDto>> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.getActor()
+        val member: Member? = rq.actor
         if (member == null) {
             return RsData<PageResponseDto<ReviewResponseDto>>("401-1", "Unauthorized access")
         }
@@ -66,7 +66,7 @@ class ReviewController(
     ): RsData<Void> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member = rq.getActor()
+        val member = rq.getAuthenticatedActor()
         reviewService.addReview(book, member, reviewRequestDto)
         return RsData("201-1", "Reviews fetched successfully")
     }
@@ -77,7 +77,7 @@ class ReviewController(
     ): RsData<Void> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.getActor()
+        val member: Member? = rq.actor
         if (member == null) {
             return RsData<Void>("401-1", "Unauthorized access")
         }
@@ -92,7 +92,7 @@ class ReviewController(
     ): RsData<Void> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.getActor()
+        val member: Member? = rq.actor
         if (member == null) {
             return RsData<Void>("401-1", "Unauthorized access")
         }
