@@ -74,7 +74,7 @@ class MemberController(
 
     @PostMapping("/logout")
     fun logout(): ResponseEntity<Void> {
-        val actor = rq.getActor()?.let { actor ->
+        val actor = rq.getActor().let { actor ->
             memberService.clearRefreshToken(actor)
         }
         // 쿠키에서 토큰 삭제

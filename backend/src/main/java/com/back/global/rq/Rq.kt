@@ -14,50 +14,51 @@ import java.util.function.Function
 import java.util.function.Predicate
 
 @Component
-@RequiredArgsConstructor
-class Rq {
-    private val req: HttpServletRequest? = null
-    private val resp: HttpServletResponse? = null
+class Rq(
+    private val req: HttpServletRequest,
+    private val resp: HttpServletResponse
+) {
+    companion object {
+        private const val ACCESS_TOKEN_DURATION = 60 * 20 // 20분
+        private const val REFRESH_TOKEN_DURATION = 60 * 60 * 24 // 1일
+        private const val DEFAULT_TOKEN_DURATION = 60 * 60 * 24 * 365 // 1년
+
+        private const val LOCALHOST = "localhost"
+        private const val PRODUCTION_DOMAIN = "bookers.p-e.kr"
+    }
 
     val actor: Member?
-        get() = Optional.ofNullable<Authentication?>(
-            SecurityContextHolder.getContext().getAuthentication()
-        )
-            .map<Any?>(Function { obj: Authentication? -> obj!!.getPrincipal() })
-            .filter(Predicate { obj: Any? -> SecurityUser::class.java.isInstance(obj) })
-            .map<SecurityUser?>(Function { obj: Any? -> SecurityUser::class.java.cast(obj) })
-            .map<Member?>(SecurityUser::member)
-            .orElse(null)
+        get() = SecurityContextHolder.getContext().authentication
+            ?.principal
+            ?.let { it as? SecurityUser }
+            ?.member
+    fun getActor(): Member = actor
+            ?: throw IllegalStateException("인증된 사용자 정보를 찾을 수 없습니다")
 
     fun setCookie(name: String, value: String?) {
-        var value = value
-        if (value == null) value = ""
+        val cookieValue = value ?: ""
 
-        val domain = if (req!!.getServerName().contains("localhost")) "localhost" else "bookers.p-e.kr"
+        val domain = if (req.serverName.contains(LOCALHOST)) LOCALHOST else PRODUCTION_DOMAIN
 
-        val cookie = Cookie(name, value)
-        cookie.setPath("/")
-        cookie.setHttpOnly(true)
-        cookie.setSecure(true)
-        cookie.setAttribute("SameSite", "None")
-        cookie.setDomain(domain)
-
-        if (value.isEmpty()) {
-            cookie.setMaxAge(0) // 즉시 만료
-        } else {
-            if (name == "accessToken") {
-                cookie.setMaxAge(60 * 20) //20분
-            } else if (name == "refreshToken") {
-                cookie.setMaxAge(60 * 60 * 24) // 1일
-            } else {
-                cookie.setMaxAge(60 * 60 * 24 * 365) // 1년
+        val cookie = Cookie(name, cookieValue).apply{
+            path = "/"
+            isHttpOnly = true
+            secure = true
+            setAttribute("SameSite", "None")
+            setDomain(domain)
+            maxAge = when {
+                cookieValue.isEmpty() -> 0 // 즉시 만료
+                name == "accessToken" -> ACCESS_TOKEN_DURATION
+                name == "refreshToken" -> REFRESH_TOKEN_DURATION
+                else -> DEFAULT_TOKEN_DURATION
             }
         }
-        resp!!.addCookie(cookie)
+        resp.addCookie(cookie)
     }
 
     fun clearAuthCookies() {
-        setCookie("accessToken", "")
-        setCookie("refreshToken", "")
+        listOf("accessToken", "refreshToken").forEach { name ->
+            setCookie(name, "")
+        }
     }
 }
