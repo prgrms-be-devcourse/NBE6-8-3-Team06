@@ -37,7 +37,7 @@ import {
 } from "@/types/book";
 import { useAuth } from "@/app/_hooks/auth-context";
 import { toast } from "sonner";
-import { createBookmark } from "@/types/bookmarkAPI.js";
+import { createBookmark } from "@/types/bookmarkAPI";
 import { getCategories, Category } from "@/types/category";
 
 interface BooksPageProps {
@@ -274,26 +274,10 @@ export default function BooksPage() {
     }
     
     try {
-      // 상태 텍스트를 ReadState enum으로 변환
-      let readState: ReadState;
-      switch (status) {
-        case "읽고 싶은 책":
-          readState = ReadState.WISH;
-          break;
-        case "읽고 있는 책":
-          readState = ReadState.READING;
-          break;
-        case "읽은 책":
-          readState = ReadState.READ;
-          break;
-        default:
-          readState = ReadState.WISH;
-      }
       
       // API 호출
       await createBookmark({
-        bookId: bookId,
-        readState: readState
+        bookId: bookId
       });
       
       // 성공 시 책 목록 새로고침 (readState 업데이트를 위해)
