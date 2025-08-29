@@ -30,8 +30,7 @@ class ReviewController(
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val member: Member = rq.getAuthenticatedActor()
-        val review = reviewService.findByBookAndMember(book, member)
-            .orElseThrow(Supplier { NoSuchElementException("Review not found") })
+        val review = reviewService.findByBookAndMember(book, member)?: throw NoSuchElementException("Review not found")
         return RsData(
             "200-1",
             "Review read successfully",

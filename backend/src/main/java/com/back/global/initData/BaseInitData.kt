@@ -70,7 +70,7 @@ class BaseInitData(
         val book = bookRepository.findAll().get(0) // 첫 번째 책을 가져옴
         for (i in 1..memberCount) {
             val member = memberRepository.findByEmail("email" + i + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")
-            val review = Review("리뷰 ㅋㅋ " + i, 5, member, book)
+            val review = Review("리뷰 ㅋㅋ " + i, 5, false,member, book)
             reviewRepository.save(review)
         }
 
@@ -125,6 +125,7 @@ class BaseInitData(
                 Review(
                     "리뷰리뷰",
                     5,
+                    false,
                     memberRepository.findByEmail("asdf@asdf.com")?:throw NoSuchElementException("멤버 못찾겠다요"),
                     bookRepository.findById(1).orElseThrow(
                         Supplier { NoSuchElementException("책 못찾겠다요") })

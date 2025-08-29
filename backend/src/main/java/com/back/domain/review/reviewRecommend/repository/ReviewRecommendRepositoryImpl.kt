@@ -10,8 +10,9 @@ class ReviewRecommendRepositoryImpl(
 ):ReviewRecommendRepositoryCustom {
     override fun isRecommendedByReviewAndMember(
         review: Review,
-        member: Member
+        member: Member?
     ): Boolean? {
+        if (member == null) return null
         return queryFactory.select(QReviewRecommend.reviewRecommend.isRecommended)
             .from(QReviewRecommend.reviewRecommend)
         .where(QReviewRecommend.reviewRecommend.review.eq(review), QReviewRecommend.reviewRecommend.member.eq(member))

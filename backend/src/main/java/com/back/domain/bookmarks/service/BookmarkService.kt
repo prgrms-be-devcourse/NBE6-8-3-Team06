@@ -191,11 +191,11 @@ class BookmarkService(
     }
 
     private fun getAvgRate(member: Member): Double {
-        return reviewRepository.findAverageRatingByMember(member).orElse(0.0)
+        return reviewRepository.findAverageRatingByMember(member)?:0.0
     }
 
     private fun getReview(bookmark: Bookmark): Review? {
-        return reviewService.findByBookAndMember(bookmark.book, bookmark.member).orElse(null)
+        return reviewService.findByBookAndMember(bookmark.book, bookmark.member)
     }
 
     private fun getReadStateByMemberAndBook(member: Member, book: Book): ReadState? {

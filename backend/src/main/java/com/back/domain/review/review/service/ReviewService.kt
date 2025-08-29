@@ -27,14 +27,14 @@ class ReviewService(
 ) {
 
 
-    fun findLatest(): Optional<Review> {
+    fun findLatest(): Review? {
         return reviewRepository.findFirstByOrderByIdDesc()
     }
 
     @Transactional
     fun addReview(book: Book, member: Member, reviewRequestDto: ReviewRequestDto) {
         val review = reviewDtoService.reviewRequestDtoToReview(reviewRequestDto, member, book)
-        if (reviewRepository.findByBookAndMember(book, member).isPresent()) {
+        reviewRepository.findByBookAndMember(book, member)?.let {
             throw ServiceException("400-1", "Review already exists")
         }
         reviewRepository.save(review)
@@ -43,16 +43,14 @@ class ReviewService(
 
     @Transactional
     fun deleteReview(book: Book, member: Member) {
-        val review = reviewRepository.findByBookAndMember(book, member)
-            .orElseThrow(Supplier { NoSuchElementException("review not found") })
+        val review = reviewRepository.findByBookAndMember(book, member)?: throw NoSuchElementException("review not found")
         reviewRepository.delete(review)
         bookService.updateBookAvgRate(book)
     }
 
     @Transactional
     fun modifyReview(book: Book, member: Member, reviewRequestDto: ReviewRequestDto) {
-        val review = reviewRepository.findByBookAndMember(book, member)
-            .orElseThrow(Supplier { NoSuchElementException("review not found") })
+        val review = reviewRepository.findByBookAndMember(book, member)?: throw NoSuchElementException("review not found")
         reviewDtoService.updateReviewFromRequest(review, reviewRequestDto)
         reviewRepository.save(review)
         bookService.updateBookAvgRate(book)
@@ -62,12 +60,12 @@ class ReviewService(
         return reviewRepository.count()
     }
 
-    fun findByBookAndMember(book: Book, member: Member): Optional<Review> {
+    fun findByBookAndMember(book: Book, member: Member): Review? {
         return reviewRepository.findByBookAndMember(book, member)
     }
 
-    fun findById(reviewId: Int): Optional<Review?> {
-        return reviewRepository.findById(reviewId)
+    fun findById(reviewId: Int): Review? {
+        return reviewRepository.findById(reviewId).orElse(null)
     }
 
     fun findByBookOrderByCreateDateDesc(book: Book, pageable: Pageable): Page<Review> {
