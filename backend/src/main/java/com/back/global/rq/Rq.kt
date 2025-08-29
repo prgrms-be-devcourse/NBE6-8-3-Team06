@@ -32,7 +32,8 @@ class Rq(
             ?.principal
             ?.let { it as? SecurityUser }
             ?.member
-    fun getActor(): Member = actor
+
+    fun getAuthenticatedActor(): Member = actor
             ?: throw IllegalStateException("인증된 사용자 정보를 찾을 수 없습니다")
 
     fun setCookie(name: String, value: String?) {
