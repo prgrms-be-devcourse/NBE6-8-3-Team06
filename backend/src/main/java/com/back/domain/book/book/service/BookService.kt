@@ -18,6 +18,7 @@ import com.back.domain.member.member.entity.Member
 import com.back.domain.review.review.dto.ReviewResponseDto
 import com.back.domain.review.review.entity.Review
 import com.back.domain.review.review.repository.ReviewRepository
+import com.back.domain.review.review.service.ReviewDtoService
 import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
 import com.back.global.dto.PageResponseDto
 import com.back.global.exception.ServiceException
@@ -36,7 +37,7 @@ class BookService(
     private val aladinApiClient: AladinApiClient,
     private val bookmarkRepository: BookmarkRepository,
     private val reviewRepository: ReviewRepository,
-    private val reviewRecommendService: ReviewRecommendService
+    private val reviewDtoService: ReviewDtoService,
 ) {
 
     companion object {
@@ -202,7 +203,7 @@ class BookService(
             // 리뷰 페이징 조회
             val reviewPage = reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
             val reviewPageResponse = PageResponseDto(
-                reviewPage.map { convertReviewToDto(it, member) }
+                reviewPage.map { reviewDtoService.reviewToReviewResponseDto(it, member) }
             )
 
             // ReadState 조회
@@ -577,21 +578,4 @@ class BookService(
         )
     }
 
-    /**
-     * Review 엔티티를 DTO로 변환
-     */
-    private fun convertReviewToDto(review: Review, member: Member?): ReviewResponseDto {
-        return ReviewResponseDto(
-            id = review.id,
-            content = review.content,
-            rate = review.rate,
-            memberName = review.member.getName(),
-            memberId = review.member.id,
-            likeCount = review.likeCount,
-            dislikeCount = review.dislikeCount,
-            isRecommended = reviewRecommendService.isRecommended(review, member),
-            createdDate = review.createDate,
-            modifiedDate = review.modifyDate
-        )
-    }
 }

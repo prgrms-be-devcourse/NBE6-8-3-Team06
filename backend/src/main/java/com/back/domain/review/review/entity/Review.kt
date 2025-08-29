@@ -15,6 +15,7 @@ class Review //    @Version
     (
     var content: String,
     var rate: Int,
+    var spoiler: Boolean,
     @field:ManyToOne(fetch = FetchType.LAZY)
     var member: Member,
     @field:ManyToOne(fetch = FetchType.LAZY)

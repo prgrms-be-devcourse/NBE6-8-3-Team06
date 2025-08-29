@@ -18,28 +18,30 @@ class ReviewDtoService(
 ) {
 
 
-    fun reviewToReviewResponseDto(review: Review, member: Member): ReviewResponseDto {
+    fun reviewToReviewResponseDto(review: Review, member: Member?): ReviewResponseDto {
     val reviewResponseDto = ReviewResponseDto(
         id = review.id,
         content = review.content,
         rate = review.rate,
-        memberName = member.getName(),
-        memberId = member.id,
+        memberName = review.member.getName(),
+        memberId = review.member.id,
         likeCount = review.likeCount,
         dislikeCount = review.dislikeCount,
         isRecommended = reviewRecommendService.isRecommended(review, member),
         createdDate = review.createDate,
-        modifiedDate = review.modifyDate
+        modifiedDate = review.modifyDate,
+        spoiler = review.spoiler,
     )
         return reviewResponseDto
     }
 
     fun reviewRequestDtoToReview(reviewRequestDto: ReviewRequestDto, member: Member, book: Book): Review {
         return Review(
-            reviewRequestDto.content,
-            reviewRequestDto.rate,
-            member,
-            book
+            content =  reviewRequestDto.content,
+            rate =  reviewRequestDto.rate,
+            spoiler =  reviewRequestDto.spoiler,
+            member = member,
+            book = book,
         )
     }
 
@@ -51,7 +53,7 @@ class ReviewDtoService(
     fun reviewsToReviewResponseDtos(reviewPage: Page<Review>, member: Member): PageResponseDto<ReviewResponseDto> {
         return PageResponseDto(reviewPage.map(Function { review: Review ->
             reviewToReviewResponseDto(
-                review,
+                 review,
                 member
             )
         }))
