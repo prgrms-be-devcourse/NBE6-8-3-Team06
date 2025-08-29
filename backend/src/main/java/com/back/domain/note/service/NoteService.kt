@@ -1,6 +1,5 @@
 package com.back.domain.note.service
 
-import com.back.domain.book.wrote.entity.Wrote
 import com.back.domain.bookmarks.entity.Bookmark
 import com.back.domain.bookmarks.repository.BookmarkRepository
 import com.back.domain.member.member.entity.Member
@@ -11,8 +10,6 @@ import com.back.global.exception.ServiceException
 import lombok.RequiredArgsConstructor
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.util.*
-import java.util.function.Supplier
 
 @Service
 @RequiredArgsConstructor

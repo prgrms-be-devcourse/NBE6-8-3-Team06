@@ -217,7 +217,7 @@ class BookService(
                 totalPage = book.totalPage,
                 publishedDate = book.publishedDate,
                 avgRate = book.avgRate,
-                categoryName = book.category?.name,
+                categoryName = book.category.name,
                 authors = book.authors.map { it.author.name },
                 readState = readState,
                 reviews = reviewPageResponse
@@ -571,7 +571,7 @@ class BookService(
             totalPage = book.totalPage,
             publishedDate = book.publishedDate,
             avgRate = book.avgRate,
-            categoryName = book.category?.name,
+            categoryName = book.category.name,
             authors = book.authors.map { it.author.name },
             readState = readState
         )
