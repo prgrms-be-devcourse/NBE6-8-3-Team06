@@ -85,3 +85,18 @@ export type ReadState = {
     READING: number;
     WISH: number;
 }
+
+export type BookmarkSearch = {
+    page: number,
+    size: number,
+    sort: string,
+    category: string,
+    readState: string,
+    keyword: string
+}
+
+export type BookmarkReadStateSearch = {
+    category: string,
+    readState: string,
+    keyword: string
+}
