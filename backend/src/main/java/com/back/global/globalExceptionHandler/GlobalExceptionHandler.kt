@@ -20,7 +20,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             RsData(
                 "404-1",
-                ex.message
+                ex.message?:"NoSuchElementException"
             ),
             HttpStatus.NOT_FOUND
         )
@@ -31,18 +31,18 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             RsData(
                 "400-1",
-                ex.message
+                ex.message?:"IllegalArgumentException"
             ),
             HttpStatus.CONFLICT
         )
     }
 
     @ExceptionHandler(NullPointerException::class)
-    fun handle(ex: NullPointerException?): ResponseEntity<RsData<Void>> {
+    fun handle(ex: NullPointerException): ResponseEntity<RsData<Void>> {
         return ResponseEntity(
             RsData(
                 "404-1",
-                "NullPointerException"
+                ex.message?:"NullPointerException"
             ),
             HttpStatus.NOT_FOUND
         )
