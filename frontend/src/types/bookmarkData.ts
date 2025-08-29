@@ -96,7 +96,7 @@ export type BookmarkSearch = {
 }
 
 export type BookmarkReadStateSearch = {
-    category: string,
-    readState: string,
-    keyword: string
+    category: string|null,
+    readState: string|null,
+    keyword: string|null
 }
