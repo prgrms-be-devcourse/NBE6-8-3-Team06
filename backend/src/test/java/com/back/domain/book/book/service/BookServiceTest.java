@@ -11,6 +11,9 @@ import com.back.domain.book.client.aladin.AladinApiClient;
 import com.back.domain.book.client.aladin.dto.AladinBookDto;
 import com.back.domain.book.wrote.entity.Wrote;
 import com.back.domain.book.wrote.repository.WroteRepository;
+import com.back.domain.bookmarks.repository.BookmarkRepository;
+import com.back.domain.review.review.repository.ReviewRepository;
+import com.back.domain.review.reviewRecommend.service.ReviewRecommendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +50,15 @@ class BookServiceTest {
     @Mock
     private AladinApiClient aladinApiClient;
 
+    @Mock
+    private BookmarkRepository bookmarkRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private ReviewRecommendService reviewRecommendService;
+
     @InjectMocks
     private BookService bookService;
 
@@ -69,7 +81,7 @@ class BookServiceTest {
                 .thenReturn(List.of(book));
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         assertThat(result).hasSize(1);
@@ -107,7 +119,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         verify(aladinApiClient).searchBooks(query, 10);
@@ -127,7 +139,7 @@ class BookServiceTest {
                 .thenReturn(book);
 
         // When
-        BookSearchDto result = bookService.getBookByIsbn(isbn);
+        BookSearchDto result = bookService.getBookByIsbn(isbn, null);
 
         // Then
         assertThat(result).isNotNull();
@@ -163,7 +175,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        BookSearchDto result = bookService.getBookByIsbn(isbn);
+        BookSearchDto result = bookService.getBookByIsbn(isbn, null);
 
         // Then
         verify(aladinApiClient).getBookByIsbn(isbn);
@@ -222,7 +234,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         verify(aladinApiClient).getBookDetails("9788966261024");
@@ -256,7 +268,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(authorRepository, never()).save(any(Author.class)); // 새로운 작가 생성 안 함
@@ -274,7 +286,7 @@ class BookServiceTest {
                 .thenReturn(List.of()); // API 클라이언트에서 빈 리스트 반환
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         assertThat(result).isEmpty();
@@ -317,7 +329,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(categoryRepository, atLeastOnce()).findByName("소설");
@@ -361,7 +373,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(categoryRepository, atLeastOnce()).findByName("새로운분야");
@@ -406,7 +418,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(categoryRepository, atLeastOnce()).findByName("외국도서");

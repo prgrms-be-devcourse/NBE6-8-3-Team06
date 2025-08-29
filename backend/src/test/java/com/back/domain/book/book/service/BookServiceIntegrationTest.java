@@ -17,9 +17,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -85,7 +84,7 @@ class BookServiceIntegrationTest {
         assertThat(booksBeforeSearch).isEmpty();
 
         // When
-        List<BookSearchDto> searchResults = bookService.searchBooks(uniqueKeyword,3);
+        List<BookSearchDto> searchResults = bookService.searchBooks(uniqueKeyword,3, null);
 
         // Then
         if (!searchResults.isEmpty()) {
@@ -113,7 +112,7 @@ class BookServiceIntegrationTest {
         int countBeforeSearch = booksBeforeSearch.size();
 
         // When
-        List<BookSearchDto> searchResults = bookService.searchBooks(TEST_SEARCH_KEYWORD, 5);
+        List<BookSearchDto> searchResults = bookService.searchBooks(TEST_SEARCH_KEYWORD, 5, null);
 
         // Then
         assertThat(searchResults).isNotEmpty();
@@ -143,7 +142,7 @@ class BookServiceIntegrationTest {
         assertThat(bookBeforeApi).isNull();
 
         // When
-        BookSearchDto result = bookService.getBookByIsbn(TEST_ISBN);
+        BookSearchDto result = bookService.getBookByIsbn(TEST_ISBN, null);
 
         // Then
         if (result != null) {
@@ -174,11 +173,11 @@ class BookServiceIntegrationTest {
     @DisplayName("동일한 ISBN으로 두 번 조회할 때 두 번째는 DB에서 가져온다")
     void getBookByIsbn_SecondCall_ShouldReturnFromDatabase() {
         // Given & When - 첫 번째 호출
-        BookSearchDto firstResult = bookService.getBookByIsbn(TEST_ISBN);
+        BookSearchDto firstResult = bookService.getBookByIsbn(TEST_ISBN, null);
 
         if (firstResult != null) {
             // When - 두 번째 호출
-            BookSearchDto secondResult = bookService.getBookByIsbn(TEST_ISBN);
+            BookSearchDto secondResult = bookService.getBookByIsbn(TEST_ISBN, null);
 
             // Then
             assertThat(secondResult).isNotNull();
@@ -194,7 +193,7 @@ class BookServiceIntegrationTest {
     @DisplayName("작가와 책의 관계가 정확히 저장되고 조회된다")
     void verifyAuthorBookRelationshipIntegrity() {
         // Given & When
-        BookSearchDto result = bookService.getBookByIsbn(TEST_ISBN);
+        BookSearchDto result = bookService.getBookByIsbn(TEST_ISBN, null);
 
         if (result != null && !result.getAuthors().isEmpty()) {
             // Then

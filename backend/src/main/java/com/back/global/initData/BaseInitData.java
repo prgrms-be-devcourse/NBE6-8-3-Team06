@@ -108,7 +108,7 @@ public class BaseInitData {
 
                     // BookService의 searchBooks 메서드를 사용해서 데이터 수집
                     // 각 검색어당 최대 3권씩 가져오기
-                    bookService.searchBooks(query, 3);
+                    bookService.searchBooks(query, 3, null);
 
 
                     // API 호출 간격 조절 (너무 빠르게 호출하지 않도록)
@@ -152,7 +152,7 @@ public class BaseInitData {
         int addedCount = 0;
         for (String isbn : specificISBNs) {
             try {
-                bookService.getBookByIsbn(isbn);
+                bookService.getBookByIsbn(isbn, null);
                 addedCount++;
 
                 // API 호출 간격 조절
