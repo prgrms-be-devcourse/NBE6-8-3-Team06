@@ -6,7 +6,6 @@ import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
 import com.back.domain.review.reviewRecommend.repository.ReviewRecommendRepository
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.function.Supplier
@@ -22,10 +21,10 @@ class ReviewRecommendService(
         val review: Review = reviewRepository.findWithLockById(reviewId)
             .orElseThrow(Supplier { NoSuchElementException("Review not found") })
         val reviewRecommend = ReviewRecommend(review, member, isRecommend)
-        if (reviewRecommendRepository.findByReviewAndMember(review, member).isPresent()) {
+        reviewRecommendRepository.findByReviewAndMember(review, member)?.let{
             throw ServiceException("400-1", "Review recommendation already exists")
         }
-        reviewRecommendRepository.save<ReviewRecommend?>(reviewRecommend)
+        reviewRecommendRepository.save(reviewRecommend)
         if (isRecommend) {
             review.incLike()
         } else {
@@ -38,8 +37,7 @@ class ReviewRecommendService(
     fun modifyRecommendReview(reviewId: Int, member: Member, isRecommend: Boolean) {
         val review: Review = reviewRepository.findWithLockById(reviewId)
             .orElseThrow(Supplier { NoSuchElementException("Review not found") })
-        val reviewRecommend = reviewRecommendRepository.findByReviewAndMember(review, member)
-            .orElseThrow(Supplier { NoSuchElementException("Review recommendation not found") })
+        val reviewRecommend = reviewRecommendRepository.findByReviewAndMember(review, member) ?: throw NoSuchElementException("Review recommendation not found")
         if (reviewRecommend.isRecommended == isRecommend) {
             throw ServiceException("400-2", "Review recommendation already set to this value")
         }
@@ -58,8 +56,7 @@ class ReviewRecommendService(
     fun cancelRecommendReview(reviewId: Int, member: Member) {
         val review: Review = reviewRepository.findWithLockById(reviewId)
             .orElseThrow(Supplier { NoSuchElementException("Review not found") })
-        val reviewRecommend = reviewRecommendRepository!!.findByReviewAndMember(review, member)
-            .orElseThrow(Supplier { NoSuchElementException("Review recommendation not found") })
+        val reviewRecommend = reviewRecommendRepository.findByReviewAndMember(review, member)?: throw NoSuchElementException("Review recommendation not found")
         reviewRecommendRepository.delete(reviewRecommend)
         if (reviewRecommend.isRecommended) {
             review.decLike()
@@ -70,8 +67,6 @@ class ReviewRecommendService(
 
     fun isRecommended(review: Review, member: Member?): Boolean? {
         if (member == null) return null
-        return reviewRecommendRepository.findByReviewAndMember(review, member)
-            .map(ReviewRecommend::isRecommended)
-            .orElse(null)
+        return reviewRecommendRepository.isRecommendedByReviewAndMember(review, member)
     }
 }

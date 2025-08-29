@@ -6,5 +6,6 @@ import jakarta.validation.constraints.NotNull
 
 data class ReviewRequestDto(
     @field:NotBlank val content: String,
-    val rate: Int
+    val rate: Int,
+    val spoiler: Boolean,
 )

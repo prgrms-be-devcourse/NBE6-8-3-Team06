@@ -6,8 +6,8 @@ import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
-interface ReviewRecommendRepository : JpaRepository<ReviewRecommend, Int> {
-    fun findByReviewAndMember(review: Review, member: Member): Optional<ReviewRecommend>
+interface ReviewRecommendRepository : JpaRepository<ReviewRecommend, Int>, ReviewRecommendRepositoryCustom {
+    fun findByReviewAndMember(review: Review, member: Member): ReviewRecommend?
     fun countByReviewAndIsRecommendedTrue(review: Review): Int
     fun countByReviewAndIsRecommendedFalse(review: Review): Int
 }
