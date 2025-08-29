@@ -16,8 +16,8 @@ class Book @JvmOverloads constructor(
     var publisher: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = true)
-    var category: Category? = null
+    @JoinColumn(name = "category_id", nullable = false)
+    var category: Category
 ) : BaseEntity() {
 
     var imageUrl: String? = null

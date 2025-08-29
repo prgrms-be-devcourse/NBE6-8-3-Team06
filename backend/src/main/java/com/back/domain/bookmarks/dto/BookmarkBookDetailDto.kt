@@ -25,7 +25,7 @@ data class BookmarkBookDetailDto(
         book.publisher,
         book.totalPage,
         book.avgRate.toDouble(),
-        book.category?.name,
+        book.category.name,
         book.authors.map { a: Wrote -> a.author.name },
         book.publishedDate
     )
