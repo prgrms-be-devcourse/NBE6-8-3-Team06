@@ -8,6 +8,4 @@ import java.util.*
 
 interface ReviewRecommendRepository : JpaRepository<ReviewRecommend, Int>, ReviewRecommendRepositoryCustom {
     fun findByReviewAndMember(review: Review, member: Member): ReviewRecommend?
-    fun countByReviewAndIsRecommendedTrue(review: Review): Int
-    fun countByReviewAndIsRecommendedFalse(review: Review): Int
 }
