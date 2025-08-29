@@ -21,7 +21,7 @@ class ReviewRecommendController(
         @PathVariable("review_id") reviewId: Int,
         @PathVariable("is_recommend") isRecommend: Boolean
     ): RsData<Void> {
-        val member: Member? = rq.getActor()
+        val member: Member? = rq.actor
         if (member == null) {
             return RsData("401-1", "Unauthorized access")
         }
@@ -34,7 +34,7 @@ class ReviewRecommendController(
         @PathVariable("review_id") reviewId: Int,
         @PathVariable("is_recommend") isRecommend: Boolean
     ): RsData<Void> {
-        val member: Member? = rq.getActor()
+        val member: Member? = rq.actor
         if (member == null) {
             return RsData("401-1", "Unauthorized access")
         }
@@ -44,7 +44,7 @@ class ReviewRecommendController(
 
     @DeleteMapping("/{review_id}")
     fun cancelRecommendReview(@PathVariable("review_id") reviewId: Int): RsData<Void> {
-        val member:Member? = rq.getActor()
+        val member:Member? = rq.actor
         if (member == null) {
             return RsData("401-1", "Unauthorized access")
         }

@@ -74,7 +74,7 @@ class MemberController(
 
     @PostMapping("/logout")
     fun logout(): ResponseEntity<Void> {
-        val actor = rq.getActor().let { actor ->
+        val actor = rq.getAuthenticatedActor().let { actor ->
             memberService.clearRefreshToken(actor)
         }
         // 쿠키에서 토큰 삭제
@@ -85,7 +85,7 @@ class MemberController(
 
     @GetMapping("/my")
     fun getAuthenticatedUser(): ResponseEntity<*> {
-            val actor = rq.getActor()
+            val actor = rq.actor
                 ?: return ResponseEntity.status(401).body("로그인 상태가 아닙니다.")
 
             return ResponseEntity.ok(MemberDto(actor))
@@ -124,7 +124,7 @@ class MemberController(
 
     @DeleteMapping("/my")
     fun deleteMember(): RsData<String?> {
-        val actor = rq.getActor()
+        val actor = rq.actor
             ?: return RsData("401-1", "로그인 상태가 아닙니다.", null)
 
         // 회원 삭제
