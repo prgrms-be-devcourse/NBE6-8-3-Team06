@@ -42,3 +42,6 @@ db_dev.trace.db
 
 ### yml ###
 src/main/resources/application-prod.yml
+
+### Personal development tools ###
+CLAUDE.md

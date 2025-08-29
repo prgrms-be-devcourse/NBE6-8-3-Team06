@@ -11,6 +11,9 @@ import com.back.domain.book.client.aladin.AladinApiClient;
 import com.back.domain.book.client.aladin.dto.AladinBookDto;
 import com.back.domain.book.wrote.entity.Wrote;
 import com.back.domain.book.wrote.repository.WroteRepository;
+import com.back.domain.bookmarks.repository.BookmarkRepository;
+import com.back.domain.review.review.repository.ReviewRepository;
+import com.back.domain.review.reviewRecommend.service.ReviewRecommendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,16 +21,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class BookServiceTest {
 
     @Mock
@@ -45,6 +50,15 @@ class BookServiceTest {
     @Mock
     private AladinApiClient aladinApiClient;
 
+    @Mock
+    private BookmarkRepository bookmarkRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private ReviewRecommendService reviewRecommendService;
+
     @InjectMocks
     private BookService bookService;
 
@@ -61,13 +75,13 @@ class BookServiceTest {
     @DisplayName("DB에서 책을 찾을 수 있는 경우 - API 호출하지 않음")
     void searchBooks_WhenBooksFoundInDB_ShouldReturnFromDB() {
         // Given
-        String query = "자바";
+        String query = "테스트 책";
         Book book = createTestBookWithAuthor();
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of(book));
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         assertThat(result).hasSize(1);
@@ -85,14 +99,14 @@ class BookServiceTest {
         String query = "새로운책";
         AladinBookDto apiBook = createTestAladinBookDto();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("J.K. 롤링"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(authorRepository.save(any(Author.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
@@ -100,12 +114,12 @@ class BookServiceTest {
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         verify(aladinApiClient).searchBooks(query, 10);
@@ -122,10 +136,10 @@ class BookServiceTest {
         String isbn = "9788966261024";
         Book book = createTestBookWithAuthor();
         when(bookRepository.findByIsbn13(isbn))
-                .thenReturn(Optional.of(book));
+                .thenReturn(book);
 
         // When
-        BookSearchDto result = bookService.getBookByIsbn(isbn);
+        BookSearchDto result = bookService.getBookByIsbn(isbn, null);
 
         // Then
         assertThat(result).isNotNull();
@@ -144,13 +158,13 @@ class BookServiceTest {
         AladinBookDto apiBook = createTestAladinBookDto();
 
         when(bookRepository.findByIsbn13(isbn))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(aladinApiClient.getBookByIsbn(isbn))
                 .thenReturn(apiBook);
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("J.K. 롤링"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(authorRepository.save(any(Author.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
@@ -161,7 +175,7 @@ class BookServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        BookSearchDto result = bookService.getBookByIsbn(isbn);
+        BookSearchDto result = bookService.getBookByIsbn(isbn, null);
 
         // Then
         verify(aladinApiClient).getBookByIsbn(isbn);
@@ -176,43 +190,51 @@ class BookServiceTest {
     void enrichMissingDetails_WhenPageMissing_ShouldEnrichFromAPI() {
         // Given
         String query = "페이지없는책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("페이지 없는 책")
-                .isbn13("9788966261024")
-                .totalPage(0) // 페이지 수 없음
-                .authors(List.of("테스트 작가"))
-                .categoryName("국내도서>소설")
-                .mallType("BOOK")
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "페이지 없는 책", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                0, // totalPage - 페이지 수 없음
+                null, // publishedDate
+                "국내도서>소설", // categoryName
+                "BOOK", // mallType
+                List.of("테스트 작가") // authors
+        );
 
-        AladinBookDto detailBook = AladinBookDto.builder()
-                .title("페이지 없는 책")
-                .isbn13("9788966261024")
-                .totalPage(300) // 상세 조회에서 페이지 수 있음
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto detailBook = new AladinBookDto(
+                "페이지 없는 책", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                300, // totalPage - 상세 조회에서 페이지 수 있음
+                null, // publishedDate
+                null, // categoryName
+                null, // mallType
+                List.of("테스트 작가") // authors
+        );
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(aladinApiClient.getBookDetails("9788966261024"))
                 .thenReturn(detailBook);
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13("9788966261024"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         verify(aladinApiClient).getBookDetails("9788966261024");
@@ -228,25 +250,25 @@ class BookServiceTest {
         String query = "기존작가책";
         AladinBookDto apiBook = createTestAladinBookDto();
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("J.K. 롤링"))
-                .thenReturn(Optional.of(testAuthor)); // 이미 존재하는 작가
+                .thenReturn(testAuthor); // 이미 존재하는 작가
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(authorRepository, never()).save(any(Author.class)); // 새로운 작가 생성 안 함
@@ -258,13 +280,13 @@ class BookServiceTest {
     void searchBooks_WhenAPICallFails_ShouldReturnEmptyList() {
         // Given
         String query = "실패테스트";
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of()); // API 클라이언트에서 빈 리스트 반환
 
         // When
-        List<BookSearchDto> result = bookService.searchBooks(query, 10);
+        List<BookSearchDto> result = bookService.searchBooks(query, 10, null);
 
         // Then
         assertThat(result).isEmpty();
@@ -277,33 +299,37 @@ class BookServiceTest {
     void categoryExtraction_ShouldExtractSecondLevel_Novel() {
         // Given
         String query = "소설책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("Test Novel")
-                .isbn13("9788966261024")
-                .categoryName("국내도서>소설>한국소설>현대소설")
-                .mallType("BOOK")
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "Test Novel", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                300, // totalPage
+                null, // publishedDate
+                "국내도서>소설>한국소설>현대소설", // categoryName
+                "BOOK", // mallType
+                List.of("테스트 작가") // authors
+        );
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("소설"))
-                .thenReturn(Optional.of(new Category("소설")));
+                .thenReturn(new Category("소설"));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(categoryRepository, atLeastOnce()).findByName("소설");
@@ -315,35 +341,39 @@ class BookServiceTest {
     void categoryExtraction_ShouldCreateNewCategory() {
         // Given
         String query = "새분야책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("Test Book")
-                .isbn13("9788966261024")
-                .categoryName("국내도서>새로운분야>세부분야")
-                .mallType("BOOK")
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "Test Book", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                300, // totalPage
+                null, // publishedDate
+                "국내도서>새로운분야>세부분야", // categoryName
+                "BOOK", // mallType
+                List.of("테스트 작가") // authors
+        );
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("새로운분야"))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(categoryRepository.save(any(Category.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(categoryRepository, atLeastOnce()).findByName("새로운분야");
@@ -358,33 +388,37 @@ class BookServiceTest {
     void categoryExtraction_ForeignBook_ShouldUseForeignCategory() {
         // Given
         String query = "외국책";
-        AladinBookDto apiBook = AladinBookDto.builder()
-                .title("Foreign Book")
-                .isbn13("9788966261024")
-                .categoryName(null) // 카테고리 정보 없음
-                .mallType("FOREIGN")
-                .authors(List.of("테스트 작가"))
-                .build();
+        AladinBookDto apiBook = new AladinBookDto(
+                "Foreign Book", // title
+                null, // imageUrl
+                null, // publisher
+                "9788966261024", // isbn13
+                250, // totalPage - 페이지 수 추가하여 상세 조회 불필요하게 만듦
+                null, // publishedDate
+                null, // categoryName - 카테고리 정보 없음
+                "FOREIGN", // mallType
+                List.of("테스트 작가") // authors
+        );
 
-        when(bookRepository.findByTitleOrAuthorContaining(query))
+        when(bookRepository.findValidBooksByTitleOrAuthorContaining(query))
                 .thenReturn(List.of());
         when(aladinApiClient.searchBooks(query, 10))
                 .thenReturn(List.of(apiBook));
         when(categoryRepository.findByName("외국도서"))
-                .thenReturn(Optional.of(new Category("외국도서")));
+                .thenReturn(new Category("외국도서"));
         when(authorRepository.findByName("테스트 작가"))
-                .thenReturn(Optional.of(testAuthor));
+                .thenReturn(testAuthor);
         when(wroteRepository.existsByAuthorAndBook(any(Author.class), any(Book.class)))
                 .thenReturn(false);
         when(wroteRepository.save(any(Wrote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(bookRepository.findByIsbn13(anyString()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
         when(bookRepository.save(any(Book.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        bookService.searchBooks(query, 10);
+        bookService.searchBooks(query, 10, null);
 
         // Then
         verify(categoryRepository, atLeastOnce()).findByName("외국도서");
@@ -394,33 +428,30 @@ class BookServiceTest {
     // ===== Helper Methods =====
 
     private Book createTestBookWithAuthor() {
-        Book book = new Book();
-        book.setTitle("테스트 책");
+        Book book = new Book("테스트 책", "테스트 출판사", defaultCategory);
         book.setImageUrl("http://test.com/image.jpg");
-        book.setPublisher("테스트 출판사");
         book.setIsbn13("9788966261024");
         book.setTotalPage(300);
         book.setAvgRate(4.5f);
-        book.setCategory(defaultCategory);
 
         // 작가 관계 설정
         Wrote wrote = new Wrote(testAuthor, book);
-        book.getAuthors().add(wrote);
+        book.addAuthor(wrote);
 
         return book;
     }
 
     private AladinBookDto createTestAladinBookDto() {
-        return AladinBookDto.builder()
-                .title("해리 포터와 마법사의 돌")
-                .imageUrl("http://image.aladin.co.kr/test.jpg")
-                .publisher("문학수첩")
-                .isbn13("9788966261024")
-                .totalPage(250)
-                .publishedDate(LocalDateTime.of(2024, 1, 15, 0, 0))
-                .categoryName("국내도서>소설>판타지소설")
-                .mallType("BOOK")
-                .authors(List.of("J.K. 롤링"))
-                .build();
+        return new AladinBookDto(
+                "해리 포터와 마법사의 돌", // title
+                "http://image.aladin.co.kr/test.jpg", // imageUrl
+                "문학수첩", // publisher
+                "9788966261024", // isbn13
+                250, // totalPage
+                LocalDateTime.of(2024, 1, 15, 0, 0), // publishedDate
+                "국내도서>소설>판타지소설", // categoryName
+                "BOOK", // mallType
+                List.of("J.K. 롤링") // authors
+        );
     }
 }

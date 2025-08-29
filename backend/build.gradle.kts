@@ -39,7 +39,7 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
 
-    // lombok
+    // lombok - for Java annotation processing
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
@@ -69,6 +69,11 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// kapt 설정 추가
+kapt {
+    keepJavacAnnotationProcessors = true
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
@@ -88,3 +93,4 @@ allOpen {
     annotation("jakarta.persistence.MappedSuperclass")
     annotation("jakarta.persistence.Embeddable")
 }
+
