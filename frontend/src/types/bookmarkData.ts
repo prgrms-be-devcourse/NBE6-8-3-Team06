@@ -90,9 +90,9 @@ export type BookmarkSearch = {
     page: number,
     size: number,
     sort: string,
-    category: string,
-    readState: string,
-    keyword: string
+    category: string | null,
+    readState: string| null,
+    keyword: string| null
 }
 
 export type BookmarkReadStateSearch = {
