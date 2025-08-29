@@ -22,7 +22,7 @@ class ReviewRecommendService(
         val review: Review = reviewRepository.findWithLockById(reviewId)
             .orElseThrow(Supplier { NoSuchElementException("Review not found") })
         val reviewRecommend = ReviewRecommend(review, member, isRecommend)
-        if (reviewRecommendRepository!!.findByReviewAndMember(review, member).isPresent()) {
+        if (reviewRecommendRepository.findByReviewAndMember(review, member).isPresent()) {
             throw ServiceException("400-1", "Review recommendation already exists")
         }
         reviewRecommendRepository.save<ReviewRecommend?>(reviewRecommend)
@@ -31,7 +31,7 @@ class ReviewRecommendService(
         } else {
             review.incDislike()
         }
-        reviewRepository.save<Review?>(review)
+        reviewRepository.save(review)
     }
 
     @Transactional

@@ -6,11 +6,9 @@ import com.back.domain.review.review.dto.ReviewRequestDto
 import com.back.domain.review.review.dto.ReviewResponseDto
 import com.back.domain.review.review.service.ReviewDtoService
 import com.back.domain.review.review.service.ReviewService
-import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
 import com.back.global.dto.PageResponseDto
 import com.back.global.rq.Rq
 import com.back.global.rsData.RsData
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -31,10 +29,7 @@ class ReviewController(
     fun getReview(@PathVariable("book_id") bookId: Int): RsData<ReviewResponseDto> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.actor
-        if (member == null) {
-            return RsData("401-1", "Unauthorized access")
-        }
+        val member: Member = rq.getAuthenticatedActor()
         val review = reviewService.findByBookAndMember(book, member)
             .orElseThrow(Supplier { NoSuchElementException("Review not found") })
         return RsData(
@@ -51,12 +46,9 @@ class ReviewController(
     ): RsData<PageResponseDto<ReviewResponseDto>> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.actor
-        if (member == null) {
-            return RsData<PageResponseDto<ReviewResponseDto>>("401-1", "Unauthorized access")
-        }
+        val member: Member = rq.getAuthenticatedActor()
         val reviews = reviewService.getPageReviewResponseDto(book, pageable, member)
-        return RsData<PageResponseDto<ReviewResponseDto>>("200-1", "Reviews fetched successfully", reviews)
+        return RsData("200-1", "Reviews fetched successfully", reviews)
     }
 
     @PostMapping("/{book_id}")
@@ -77,12 +69,9 @@ class ReviewController(
     ): RsData<Void> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.actor
-        if (member == null) {
-            return RsData<Void>("401-1", "Unauthorized access")
-        }
+        val member: Member = rq.getAuthenticatedActor()
         reviewService.deleteReview(book, member)
-        return RsData<Void>("200-1", "Review deleted successfully")
+        return RsData("200-1", "Review deleted successfully")
     }
 
     @PutMapping("/{book_id}")
@@ -92,11 +81,8 @@ class ReviewController(
     ): RsData<Void> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
-        val member: Member? = rq.actor
-        if (member == null) {
-            return RsData<Void>("401-1", "Unauthorized access")
-        }
+        val member: Member = rq.getAuthenticatedActor()
         reviewService.modifyReview(book, member, reviewRequestDto)
-        return RsData<Void>("200-1", "Review modified successfully")
+        return RsData("200-1", "Review modified successfully")
     }
 }
