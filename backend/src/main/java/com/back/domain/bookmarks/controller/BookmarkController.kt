@@ -91,7 +91,7 @@ class BookmarkController(
         return RsData(
             "200-1",
             "${pageable.pageNumber}번 페이지 조회 성공",
-            PageResponseDto<BookmarkDto>(bookmarkDtoPage)
+            PageResponseDto(bookmarkDtoPage)
         )
     }
 
@@ -146,9 +146,9 @@ class BookmarkController(
         @RequestParam(value = "category", required = false) category: String?,
         @RequestParam(value = "readState", required = false) read_state: String?,
         @RequestParam(value = "keyword", required = false) keyword: String?
-    ): RsData<BookmarkReadStatesDto?> {
+    ): RsData<BookmarkReadStatesDto> {
         val member = rq.getAuthenticatedActor()
         val bookmarkReadStatesDto = bookmarkService.getReadStatesCount(member, category, read_state, keyword)
-        return RsData<BookmarkReadStatesDto?>("200-1", "조회 성공", bookmarkReadStatesDto)
+        return RsData("200-1", "조회 성공", bookmarkReadStatesDto)
     }
 }
