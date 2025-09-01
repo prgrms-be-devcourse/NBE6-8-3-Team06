@@ -93,4 +93,11 @@ class ReviewService(
     fun hardDelete(days:Int){
         reviewRepository.hardDeleteByElapsedDays(days = days)
     }
+
+    @Transactional
+    fun softDelete(reviewId: Int) {
+        val review = reviewRepository.findById(reviewId).orElseThrow { throw NoSuchElementException("Review not found") }
+        review.deleted = true
+        bookService.updateBookAvgRate(review.book)
+    }
 }

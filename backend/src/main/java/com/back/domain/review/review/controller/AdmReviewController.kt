@@ -22,8 +22,9 @@ class AdmReviewController(
     @DeleteMapping("/soft/{review_id}")
     fun softDelete(
         @RequestParam("review_id") reviewId:Int,
-    ){
-
+    ):RsData<Void>{
+        reviewService.softDelete(reviewId)
+        return RsData("200-1", "Review deleted successfully")
     }
 
 }
