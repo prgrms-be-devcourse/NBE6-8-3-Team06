@@ -56,7 +56,6 @@ class MemberController(
         val accessToken = memberService.geneAccessToken(member)
         val refreshToken = memberService.geneRefreshToken(member)
 
-        member.updateRefreshToken(refreshToken)
         memberService.save(member)
 
         rq.setCookie("accessToken", accessToken)

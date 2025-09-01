@@ -1,181 +1,170 @@
 package com.back.domain.member.member.service
 
 import com.back.domain.member.member.entity.Member
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.test.util.ReflectionTestUtils
 
-@ExtendWith(MockitoExtension::class)
+
 @DisplayName("AuthTokenService 테스트")
 internal class AuthTokenServiceTest {
-    @InjectMocks
-    private val authTokenService: AuthTokenService? = null
 
-    private var testMember: Member? = null
+    private lateinit var authTokenService: AuthTokenService
+    private lateinit var testMember: Member
+
     private val jwtSecretKey = "testSecretKey545348354897892318523489523445964345"
     private val accessTokenExpSec = 3600
     private val refreshTokenExpSec = 60 * 60 * 24
 
     @BeforeEach
     fun setUp() {
-        // private 필드에 값 주입
-        ReflectionTestUtils.setField(authTokenService!!, "jwtSecretKey", jwtSecretKey)
-        ReflectionTestUtils.setField(authTokenService, "accessTokenExpSec", accessTokenExpSec)
-        ReflectionTestUtils.setField(authTokenService, "refreshTokenExpSec", refreshTokenExpSec)
+        authTokenService = AuthTokenService(jwtSecretKey, accessTokenExpSec, refreshTokenExpSec)
 
-        // 테스트용 User 객체 생성
-        testMember = Member("testuser", "test@example.com", "password")
-        // BaseEntity의 ID 설정을 위해 리플렉션 사용
-        ReflectionTestUtils.setField(testMember!!, "id", 1)
-    }
-
-    @Test
-    @DisplayName("JWT 토큰 생성 성공 테스트")
-    fun t1() {
-        // genAccessToken은 package-private이므로 리플렉션 사용
-        val accessToken = ReflectionTestUtils.invokeMethod<String?>(authTokenService!!, "genAccessToken", testMember)
-
-
-        Assertions.assertThat(accessToken).isNotNull()
-        Assertions.assertThat(accessToken).isNotEmpty()
-
-        // 생성된 토큰이 유효한지 확인
-        Assertions.assertThat(authTokenService.isValid(accessToken!!)).isTrue()
-
-        // payload 확인
-        val payload: MutableMap<String?, Any?>? = authTokenService.payload(accessToken)
-        Assertions.assertThat<String?, Any?>(payload).isNotNull()
-        Assertions.assertThat<Any?>(payload!!.get("id")).isEqualTo(testMember!!.id)
-        Assertions.assertThat<Any?>(payload.get("email")).isEqualTo(testMember!!.getEmail())
-    }
-
-    @Test
-    @DisplayName("유효한 JWT 토큰 검증 성공 테스트")
-    fun t2() {
-        val validToken = ReflectionTestUtils.invokeMethod<String?>(authTokenService!!, "genAccessToken", testMember)
-
-
-        val isValid = authTokenService.isValid(validToken!!)
-
-
-        Assertions.assertThat(isValid).isTrue()
-    }
-
-    @Test
-    @DisplayName("잘못된 JWT 토큰 검증 실패 테스트")
-    fun t3() {
-        val invalidToken = "invalid.jwt.token"
-
-
-        val isValid = authTokenService!!.isValid(invalidToken)
-
-
-        Assertions.assertThat(isValid).isFalse()
-    }
-
-    @Test
-    @DisplayName("만료된 JWT 토큰 검증 실패 테스트")
-    fun t4() {
-        // 만료 시간을 1초로 설정하여 즉시 만료되는 토큰 생성
-
-        ReflectionTestUtils.setField(authTokenService!!, "accessTokenExpSec", 1)
-        val expiredToken = ReflectionTestUtils.invokeMethod<String?>(authTokenService, "genAccessToken", testMember)
-
-        // 토큰이 만료되도록 2초 대기
-        try {
-            Thread.sleep(2000)
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt()
+        testMember = Member("testuser", "test@example.com", "password").apply {
+            ReflectionTestUtils.setField(this, "id", 1)
         }
-
-
-        val isValid = authTokenService.isValid(expiredToken!!)
-
-
-        Assertions.assertThat(isValid).isFalse()
     }
 
     @Test
-    @DisplayName("유효한 토큰에서 payload 추출 성공 테스트")
-    fun t5() {
-        val validToken = ReflectionTestUtils.invokeMethod<String?>(authTokenService!!, "genAccessToken", testMember)
+    @DisplayName("JWT 액세스 토큰 생성")
+    fun t1() {
+        // when
+        val accessToken = authTokenService.genAccessToken(testMember)
 
+        // then
+        assertThat(accessToken).isNotNull
+        assertThat(accessToken).isNotEmpty
+        assertThat(authTokenService.isValid(accessToken!!)).isTrue
 
-        val payload: MutableMap<String?, Any?>? = authTokenService.payload(validToken!!)
-
-
-        Assertions.assertThat<String?, Any?>(payload).isNotNull()
-        Assertions.assertThat<String?, Any?>(payload).hasSize(2)
-        Assertions.assertThat<Any?>(payload!!.get("id")).isEqualTo(testMember!!.id)
-        Assertions.assertThat<Any?>(payload.get("email")).isEqualTo(testMember!!.getEmail())
+        val payload = authTokenService.payload(accessToken)
+        assertThat(payload).isNotNull
+        assertThat(payload!!["id"]).isEqualTo(testMember.id)
+        assertThat(payload["email"]).isEqualTo(testMember.getEmail())
     }
 
     @Test
-    @DisplayName("잘못된 토큰에서 payload 추출 실패 테스트")
-    fun t6() {
-        val invalidToken = "invalid.jwt.token"
+    @DisplayName("JWT 리프레시 토큰 생성")
+    fun t2() {
+        // when
+        val refreshToken = authTokenService.genRefreshToken(testMember)
 
+        // then
+        assertThat(refreshToken).isNotNull
+        assertThat(refreshToken).isNotEmpty
+        assertThat(authTokenService.isValid(refreshToken!!)).isTrue
 
-        val payload: MutableMap<String?, Any?>? = authTokenService!!.payload(invalidToken)
-
-
-        Assertions.assertThat<String?, Any?>(payload).isNull()
+        val payload = authTokenService.payload(refreshToken)
+        assertThat(payload).isNotNull
+        assertThat(payload!!).hasSize(2)
+        assertThat(payload["id"]).isEqualTo(testMember.id)
+        assertThat(payload["email"]).isEqualTo(testMember.getEmail())
     }
 
     @Test
-    @DisplayName("다른 시크릿 키로 서명된 토큰 검증 실패 테스트")
-    fun t7() {
-        val validToken = ReflectionTestUtils.invokeMethod<String?>(authTokenService!!, "genAccessToken", testMember)
+    @DisplayName("유효한 JWT 토큰 검증")
+    fun t3() {
+        // given
+        val validToken = authTokenService.genAccessToken(testMember)
 
-        // 다른 시크릿 키로 변경
-        ReflectionTestUtils.setField(authTokenService, "jwtSecretKey", "differentSecretKey249842348974897988656456")
-
-
+        // when
         val isValid = authTokenService.isValid(validToken!!)
 
-
-        Assertions.assertThat(isValid).isFalse()
+        // then
+        assertThat(isValid).isTrue
     }
 
     @Test
-    @DisplayName("Refresh Token 생성 성공 테스트")
+    @DisplayName("잘못된 JWT 토큰 검증 실패")
+    fun t4() {
+        // given
+        val invalidToken = "invalid.jwt.token"
+
+        // when
+        val isValid = authTokenService.isValid(invalidToken)
+
+        // then
+        assertThat(isValid).isFalse
+    }
+
+    @Test
+    @DisplayName("만료된 JWT 토큰 검증 실패")
+    fun t5() {
+        // given - 1초로 설정한 짧은 만료시간의 서비스
+        val shortExpService = AuthTokenService(jwtSecretKey, 1, refreshTokenExpSec)
+        val expiredToken = shortExpService.genAccessToken(testMember)
+
+        // when - 토큰 만료를 위해 2초 대기
+        Thread.sleep(2000)
+        val isValid = shortExpService.isValid(expiredToken!!)
+
+        // then
+        assertThat(isValid).isFalse
+    }
+
+    @Test
+    @DisplayName("유효한 토큰에서 payload 추출")
+    fun t6() {
+        // given
+        val validToken = authTokenService.genAccessToken(testMember)
+
+        // when
+        val payload = authTokenService.payload(validToken!!)
+
+        // then
+        assertThat(payload).isNotNull
+        assertThat(payload!!).hasSize(2)
+        assertThat(payload["id"]).isEqualTo(testMember.id)
+        assertThat(payload["email"]).isEqualTo(testMember.getEmail())
+    }
+
+    @Test
+    @DisplayName("잘못된 토큰에서 payload 추출 실패")
+    fun t7() {
+        // given
+        val invalidToken = "invalid.jwt.token"
+
+        // when
+        val payload = authTokenService.payload(invalidToken)
+
+        // then
+        assertThat(payload).isNull()
+    }
+
+    @Test
+    @DisplayName("다른 시크릿 키로 서명된 토큰 검증 실패")
     fun t8() {
-        // RefreshToken 생성
-        val refreshToken = authTokenService!!.genRefreshToken(testMember!!)
+        // given
+        val validToken = authTokenService.genAccessToken(testMember)
+        val differentKeyService = AuthTokenService("differentSecretKey249842348974897988656456", accessTokenExpSec, refreshTokenExpSec)
 
-        Assertions.assertThat(refreshToken).isNotNull()
-        Assertions.assertThat(refreshToken).isNotEmpty()
+        // when
+        val isValid = differentKeyService.isValid(validToken!!)
 
-        // 생성된 Refresh Token이 유효한지 확인
-        Assertions.assertThat(authTokenService.isValid(refreshToken!!)).isTrue()
-
-        // payload 확인
-        val payload: MutableMap<String?, Any?>? = authTokenService.payload(refreshToken)
-        Assertions.assertThat<String?, Any?>(payload).isNotNull()
-        Assertions.assertThat<Any?>(payload!!.get("id")).isEqualTo(testMember!!.id)
-        Assertions.assertThat<Any?>(payload.get("email")).isEqualTo(testMember!!.getEmail())
+        // then
+        assertThat(isValid).isFalse
     }
 
     @Test
-    @DisplayName("Refresh Token 유효성 검증 및 payload 추출 성공 테스트")
+    @DisplayName("액세스 토큰과 리프레시 토큰 동시 생성 및 검증")
     fun t9() {
-        // RefreshToken 생성
-        val refreshToken = authTokenService!!.genRefreshToken(testMember!!)
+        // when
+        val accessToken = authTokenService.genAccessToken(testMember)
+        val refreshToken = authTokenService.genRefreshToken(testMember)
 
-        // 유효성 검증
-        val isValid = authTokenService.isValid(refreshToken!!)
-        Assertions.assertThat(isValid).isTrue()
+        // then
+        assertThat(accessToken).isNotNull
+        assertThat(refreshToken).isNotNull
+        assertThat(accessToken).isNotEqualTo(refreshToken)
 
-        // payload 추출
-        val payload: MutableMap<String?, Any?>? = authTokenService.payload(refreshToken)
-        Assertions.assertThat<String?, Any?>(payload).isNotNull()
-        Assertions.assertThat<String?, Any?>(payload).hasSize(2)
-        Assertions.assertThat<Any?>(payload!!.get("id")).isEqualTo(testMember!!.id)
-        Assertions.assertThat<Any?>(payload.get("email")).isEqualTo(testMember!!.getEmail())
+        assertThat(authTokenService.isValid(accessToken!!)).isTrue
+        assertThat(authTokenService.isValid(refreshToken!!)).isTrue
+
+        // 두 토큰의 payload가 같은지 확인
+        val accessPayload = authTokenService.payload(accessToken)
+        val refreshPayload = authTokenService.payload(refreshToken)
+
+        assertThat(accessPayload).isEqualTo(refreshPayload)
     }
 }
