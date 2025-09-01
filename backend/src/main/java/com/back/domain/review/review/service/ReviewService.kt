@@ -1,6 +1,7 @@
 package com.back.domain.review.review.service
 
 import com.back.domain.book.book.entity.Book
+import com.back.domain.book.book.repository.BookRepository
 import com.back.domain.book.book.service.BookService
 import com.back.domain.member.member.entity.Member
 import com.back.domain.review.review.dto.ReviewRequestDto
@@ -23,7 +24,8 @@ class ReviewService(
     private val reviewRepository: ReviewRepository,
     private val reviewDtoService: ReviewDtoService,
     private val bookService: BookService,
-    private val reviewRecommendService: ReviewRecommendService
+    private val reviewRecommendService: ReviewRecommendService,
+    private val bookRepository: BookRepository,
 ) {
 
 
@@ -32,7 +34,9 @@ class ReviewService(
     }
 
     @Transactional
-    fun addReview(book: Book, member: Member, reviewRequestDto: ReviewRequestDto) {
+    fun addReview(bookId: Int, member: Member, reviewRequestDto: ReviewRequestDto) {
+        val book = bookRepository.findById(bookId)
+            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val review = reviewDtoService.reviewRequestDtoToReview(reviewRequestDto, member, book)
         reviewRepository.findByBookAndMember(book, member)?.let {
             throw ServiceException("400-1", "Review already exists")
@@ -42,14 +46,18 @@ class ReviewService(
     }
 
     @Transactional
-    fun deleteReview(book: Book, member: Member) {
+    fun deleteReview(bookId: Int, member: Member) {
+        val book = bookRepository.findById(bookId)
+            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val review = reviewRepository.findByBookAndMember(book, member)?: throw NoSuchElementException("review not found")
         reviewRepository.delete(review)
         bookService.updateBookAvgRate(book)
     }
 
     @Transactional
-    fun modifyReview(book: Book, member: Member, reviewRequestDto: ReviewRequestDto) {
+    fun modifyReview(bookId: Int, member: Member, reviewRequestDto: ReviewRequestDto) {
+        val book = bookRepository.findById(bookId)
+            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val review = reviewRepository.findByBookAndMember(book, member)?: throw NoSuchElementException("review not found")
         reviewDtoService.updateReviewFromRequest(review, reviewRequestDto)
         reviewRepository.save(review)
@@ -60,7 +68,9 @@ class ReviewService(
         return reviewRepository.count()
     }
 
-    fun findByBookAndMember(book: Book, member: Member): Review? {
+    fun findByBookAndMember(bookId: Int, member: Member): Review? {
+        val book = bookRepository.findById(bookId)
+            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         return reviewRepository.findByBookAndMember(book, member)
     }
 
@@ -72,7 +82,9 @@ class ReviewService(
         return reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
     }
 
-    fun getPageReviewResponseDto(book: Book, pageable: Pageable, member: Member): PageResponseDto<ReviewResponseDto> {
+    fun getPageReviewResponseDto(bookId: Int, pageable: Pageable, member: Member): PageResponseDto<ReviewResponseDto> {
+        val book = bookRepository.findById(bookId)
+            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val reviewPage: Page<Review> = reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
         return reviewDtoService.reviewsToReviewResponseDtos(reviewPage, member)
     }

@@ -53,8 +53,8 @@ class ReviewDtoService(
     fun reviewsToReviewResponseDtos(reviewPage: Page<Review>, member: Member): PageResponseDto<ReviewResponseDto> {
         return PageResponseDto(reviewPage.map(Function { review: Review ->
             reviewToReviewResponseDto(
-                 review,
-                member
+                review = review,
+                member = member
             )
         }))
     }

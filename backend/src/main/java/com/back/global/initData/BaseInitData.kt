@@ -70,7 +70,7 @@ class BaseInitData(
         val book = bookRepository.findAll().get(0) // 첫 번째 책을 가져옴
         for (i in 1..memberCount) {
             val member = memberRepository.findByEmail("email" + i + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")
-            reviewService.addReview(book, member, ReviewRequestDto("리뷰 ㅋㅋ " + i, 5, false))
+            reviewService.addReview(book.id, member, ReviewRequestDto("리뷰 ㅋㅋ " + i, 5, false))
         }
 
         //        Category category = categoryRepository.save(new Category("Test Category"));
@@ -121,8 +121,7 @@ class BaseInitData(
 
             memberRepository.save(Member("리뷰쓰는놈", "asdf@asdf.com", "asdfasdfasdf"))
             reviewService.addReview(
-                bookRepository.findById(1).orElseThrow(
-                    Supplier { NoSuchElementException("책 못찾겠다요") }),
+                1,
                 memberRepository.findByEmail("asdf@asdf.com")?:throw NoSuchElementException("멤버 못찾겠다요"),
                 ReviewRequestDto(
                     "리뷰리뷰",

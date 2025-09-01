@@ -232,11 +232,9 @@ class BookService(
     /**
      * 책 평균 평점 업데이트
      */
-    @Transactional
     fun updateBookAvgRate(book: Book) {
         val avgRate = calculateAvgRateForBook(book)
         book.avgRate = avgRate
-        bookRepository.save(book)
         log.info("책 평균 평점 업데이트: {} -> {}", book.title, avgRate)
     }
 
@@ -528,7 +526,7 @@ class BookService(
      */
     private fun calculateAvgRateForBook(book: Book): Float {
         val reviews = book.reviews
-        if (reviews.isNullOrEmpty()) return 0.0f
+        if (reviews.isEmpty()) return 0.0f
 
         return reviews.map { it.rate }.average().toFloat()
     }

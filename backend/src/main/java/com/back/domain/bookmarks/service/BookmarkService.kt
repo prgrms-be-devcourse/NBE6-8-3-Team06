@@ -154,7 +154,7 @@ class BookmarkService(
         bookmarkRepository.delete(bookmark)
         //리뷰가 있는 경우, 리뷰 삭제
         if (getReview(bookmark) != null) {
-            reviewService.deleteReview(bookmark.book, member)
+            reviewService.deleteReview(bookmark.book.id, member)
         }
     }
 
@@ -195,7 +195,7 @@ class BookmarkService(
     }
 
     private fun getReview(bookmark: Bookmark): Review? {
-        return reviewService.findByBookAndMember(bookmark.book, bookmark.member)
+        return reviewService.findByBookAndMember(bookmark.book.id, bookmark.member)
     }
 
     private fun getReadStateByMemberAndBook(member: Member, book: Book): ReadState? {
