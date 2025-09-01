@@ -15,7 +15,6 @@ import com.back.domain.note.repository.NoteRepository
 import com.back.domain.note.service.NoteService
 import com.back.domain.review.review.entity.Review
 import com.back.domain.review.review.repository.ReviewRepository
-import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -28,7 +27,6 @@ import java.util.function.Supplier
 
 
 @Configuration
-@RequiredArgsConstructor
 class BaseInitData(
     private val memberService: MemberService,
     private val categoryRepository: CategoryRepository,

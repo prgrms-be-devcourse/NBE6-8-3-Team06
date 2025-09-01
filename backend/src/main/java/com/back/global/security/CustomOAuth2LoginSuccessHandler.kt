@@ -24,8 +24,10 @@ class CustomOAuth2LoginSuccessHandler(
 
         val accessToken = memberService.geneAccessToken(actor)
 
+        // 쿠키 설정
         rq.setCookie("accessToken", accessToken)
 
+        // 프론트엔드로 리다이렉트 (3000 포트로 복원)
         val redirectUrl = request.getParameter("state")
             ?.let { encoded ->
                 runCatching {
@@ -34,7 +36,7 @@ class CustomOAuth2LoginSuccessHandler(
             }
             ?.substringBefore('#')
             ?.takeIf { it.isNotBlank() }
-            ?: "/"
+            ?: "http://localhost:3000"
 
         rq.sendRedirect(redirectUrl)
     }

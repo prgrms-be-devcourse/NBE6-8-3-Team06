@@ -6,7 +6,6 @@ import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
 import com.back.domain.review.reviewRecommend.repository.ReviewRecommendRepository
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.function.Supplier

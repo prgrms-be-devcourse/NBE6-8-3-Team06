@@ -14,7 +14,6 @@ import com.back.domain.review.review.entity.Review
 import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.review.service.ReviewService
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.*
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

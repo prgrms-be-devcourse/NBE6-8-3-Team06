@@ -6,12 +6,8 @@ import com.back.global.jpa.entity.BaseEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
-import lombok.Getter
-import lombok.NoArgsConstructor
-import lombok.Setter
 
 @Entity
-@NoArgsConstructor
 class ReviewRecommend(
     @field:ManyToOne(fetch = FetchType.LAZY) var review: Review,
     @field:ManyToOne(fetch = FetchType.LAZY) var member: Member,

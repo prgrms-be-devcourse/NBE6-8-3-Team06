@@ -6,12 +6,9 @@ import com.back.domain.member.member.entity.Member
 import com.back.domain.note.entity.Note
 import com.back.global.jpa.entity.BaseEntity
 import jakarta.persistence.*
-import lombok.AccessLevel
-import lombok.NoArgsConstructor
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 class Bookmark(
     @field:JoinColumn(name = "book_id")
