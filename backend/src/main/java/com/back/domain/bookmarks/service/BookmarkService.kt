@@ -190,7 +190,7 @@ class BookmarkService(
     }
 
     private fun getAvgRate(member: Member): Double {
-        return reviewRepository.findAverageRatingByMember(member)?:0.0
+        return reviewRepository.findAverageRatingByMember(member)
     }
 
     private fun getReview(bookmark: Bookmark): Review? {

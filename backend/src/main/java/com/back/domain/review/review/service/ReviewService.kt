@@ -49,7 +49,7 @@ class ReviewService(
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val review = reviewRepository.findByBookAndMember(book, member)?: throw NoSuchElementException("review not found")
-        reviewRepository.delete(review)
+        review.deleted = true
         bookService.updateBookAvgRate(book)
     }
 

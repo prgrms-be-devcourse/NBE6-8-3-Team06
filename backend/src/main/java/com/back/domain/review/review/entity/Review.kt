@@ -20,6 +20,7 @@ class Review //    @Version
 ) : BaseEntity() {
     @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, orphanRemoval = true, cascade = [CascadeType.ALL])
     private val reviewRecommends: MutableList<ReviewRecommend> = ArrayList()
+    var deleted = false
 
     var likeCount = 0
 
