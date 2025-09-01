@@ -22,6 +22,7 @@ class ReviewReportService(
         return reviewReportDtoService.pageEntity2pageResponseDto(reviewReportPage);
     }
 
+    @Transactional
     fun create(reviewId:Int, member: Member,reviewReportRequestDto: ReviewReportCreateDto) {
         val review = reviewService.findById(reviewId).get()
         val reviewReport = reviewReportDtoService.createDto2entity(review, member, reviewReportRequestDto)

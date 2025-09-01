@@ -67,6 +67,7 @@ class ReviewService(
         return reviewRepository.count()
     }
 
+    @Transactional(readOnly = true)
     fun findByBookAndMember(bookId: Int, member: Member): Review? {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
@@ -81,6 +82,7 @@ class ReviewService(
         return reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
     }
 
+    @Transactional(readOnly = true)
     fun getPageReviewResponseDto(bookId: Int, pageable: Pageable, member: Member): PageResponseDto<ReviewResponseDto> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
