@@ -18,4 +18,6 @@ interface ReviewRepositoryCustom {
 
     fun findByBookOrderByCreateDateDesc(book: Book, pageable: Pageable): Page<Review>
 
+    fun hardDeleteByElapsedDays(days: Int)
+
 }

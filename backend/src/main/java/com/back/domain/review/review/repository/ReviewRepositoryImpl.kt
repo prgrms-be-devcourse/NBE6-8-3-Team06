@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
+import java.time.LocalDateTime
 
 class ReviewRepositoryImpl(
     private val queryFactory: JPAQueryFactory
@@ -79,5 +80,14 @@ class ReviewRepositoryImpl(
             .from(QReview.review)
             .where(booleanBuilder)
         return PageableExecutionUtils.getPage(reviewPage, pageable) { count.fetchOne()?: 0L }
+    }
+
+    override fun hardDeleteByElapsedDays(days: Int) {
+        val booleanBuilder = BooleanBuilder(QReview.review.modifyDate.before(LocalDateTime.now().minusDays(days.toLong())))
+        booleanBuilder.and(QReview.review.deleted.eq(true))
+        queryFactory.delete(QReview.review)
+            .where(booleanBuilder)
+            .execute()
+        return
     }
 }

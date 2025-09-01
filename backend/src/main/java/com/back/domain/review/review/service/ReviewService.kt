@@ -87,4 +87,8 @@ class ReviewService(
         val reviewPage: Page<Review> = reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
         return reviewDtoService.reviewsToReviewResponseDtos(reviewPage, member)
     }
+
+    fun hardDelete(days:Int){
+        reviewRepository.hardDeleteByElapsedDays(days = days)
+    }
 }
