@@ -3,9 +3,7 @@ package com.back.domain.member.member.service
 import com.back.domain.member.member.entity.Member
 import com.back.global.standard.util.Ut
 import org.springframework.beans.factory.annotation.Value
-
 import org.springframework.stereotype.Service
-import java.util.Map
 
 @Service
 class AuthTokenService(
@@ -16,7 +14,8 @@ class AuthTokenService(
     @Value("\${custom.refreshToken.expirationSeconds}")
     private val refreshTokenExpSec: Int
 ) {
-   fun genAccessToken(member: Member): String? {
+    
+    fun genAccessToken(member: Member): String? {
         val payload = mapOf(
             "id" to member.id,
             "email" to member.getEmail()
@@ -42,12 +41,11 @@ class AuthTokenService(
         )
     }
 
-
-    fun payload(accessToken: String): MutableMap<String, Any>? {
+    fun payload(accessToken: String): Map<String, Any>? {
         val parsedPayload = Ut.jwt.payload(jwtSecretKey, accessToken)
             ?: return null
 
-        return mutableMapOf(
+        return mapOf(
             "id" to parsedPayload["id"] as Int,
             "email" to parsedPayload["email"] as String
         )
