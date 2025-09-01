@@ -3,11 +3,9 @@ package com.back.domain.member.member.service
 import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.repository.MemberRepository
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Service
 @Transactional
@@ -24,6 +22,8 @@ class MemberService(
         val member = Member(name, email, password)
         return memberRepository.save<Member>(member)
     }
+
+    fun findById(id: Int): Member? = memberRepository.findById(id).orElse(null)
 
     fun findByEmail(email: String): Member? {
         return memberRepository.findByEmail(email)
