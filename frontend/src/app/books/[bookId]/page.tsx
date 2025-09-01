@@ -14,6 +14,7 @@ import { useReview, useReviewRecommend } from "@/app/_hooks/useReview";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/app/_hooks/auth-context";
 import { toast } from "sonner";
+import Spoiler from "@/components/Spoiler";
 
 export default function page({params}:{params:Promise<{bookId:string}>}){
     const {bookId:bookIdStr} = use(params);
@@ -314,30 +315,32 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
                         <Avatar>
                           <AvatarFallback>{review.memberName?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="font-medium">{review.memberName || '익명 사용자'}</span>
-                            <div className="flex items-center space-x-1">
-                              {renderStars(review.rate)}
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="font-medium">{review.memberName || '익명 사용자'}</span>
+                              <div className="flex items-center space-x-1">
+                                {renderStars(review.rate)}
+                              </div>
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(review.createdDate).toLocaleDateString('ko-KR')}
+                              </span>
                             </div>
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(review.createdDate).toLocaleDateString('ko-KR')}
-                            </span>
+                            <Spoiler enabled={review.spoiler}>
+                              <p className="text-muted-foreground mb-3 leading-relaxed">
+                                {review.content}
+                              </p>
+                            </Spoiler>
+                            <div className="flex items-center space-x-4">
+                              <Button variant={"ghost"} size="sm" onClick={()=>{handleRecommend(review, true)}}>
+                                <ThumbsUp fill={review.isRecommended === true ? theme==="dark"?"#fff":"#000" : "none"} strokeWidth={review.isRecommended===true?1:2} className={"h-4 w-4 mr-1"} />
+                                좋아요 {reviewRecommendApi.formatLikes(review.likeCount)}
+                              </Button>
+                              <Button variant={"ghost"} size="sm" onClick={()=>{handleRecommend(review, false)}}>
+                                <ThumbsDown fill={review.isRecommended === false ? theme==="dark"?"#fff":"#000" : "none"} strokeWidth={review.isRecommended===false?1:2} className="h-4 w-4 mr-1" />
+                                싫어요 {reviewRecommendApi.formatLikes(review.dislikeCount)}
+                              </Button>
+                            </div>
                           </div>
-                          <p className="text-muted-foreground mb-3 leading-relaxed">
-                            {review.content}
-                          </p>
-                          <div className="flex items-center space-x-4">
-                            <Button variant={"ghost"} size="sm" onClick={()=>{handleRecommend(review, true)}}>
-                              <ThumbsUp fill={review.isRecommended === true ? theme==="dark"?"#fff":"#000" : "none"} strokeWidth={review.isRecommended===true?1:2} className={"h-4 w-4 mr-1"} />
-                              좋아요 {reviewRecommendApi.formatLikes(review.likeCount)}
-                            </Button>
-                            <Button variant={"ghost"} size="sm" onClick={()=>{handleRecommend(review, false)}}>
-                              <ThumbsDown fill={review.isRecommended === false ? theme==="dark"?"#fff":"#000" : "none"} strokeWidth={review.isRecommended===false?1:2} className="h-4 w-4 mr-1" />
-                              싫어요 {reviewRecommendApi.formatLikes(review.dislikeCount)}
-                            </Button>
-                          </div>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>

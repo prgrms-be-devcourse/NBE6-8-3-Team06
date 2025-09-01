@@ -13,8 +13,8 @@ import com.back.domain.member.member.repository.MemberRepository
 import com.back.domain.member.member.service.MemberService
 import com.back.domain.note.repository.NoteRepository
 import com.back.domain.note.service.NoteService
-import com.back.domain.review.review.entity.Review
-import com.back.domain.review.review.repository.ReviewRepository
+import com.back.domain.review.review.dto.ReviewRequestDto
+import com.back.domain.review.review.service.ReviewService
 import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
@@ -39,8 +39,8 @@ class BaseInitData(
     private val bookmarkService: BookmarkService,
     private val bookmarkRepository: BookmarkRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val reviewRepository: ReviewRepository,
     private val memberRepository: MemberRepository,
+    private val reviewService: ReviewService,
 ) {
     @Autowired
     @Lazy
@@ -68,10 +68,17 @@ class BaseInitData(
             memberService.join("testUser" + i, "email" + i + "@a.a", passwordEncoder.encode("password" + i))
         }
         val book = bookRepository.findAll().get(0) // 첫 번째 책을 가져옴
-        for (i in 1..memberCount) {
+        for (i in 1..memberCount-1) {
             val member = memberRepository.findByEmail("email" + i + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")
-            val review = Review("리뷰 ㅋㅋ " + i, 5, member, book)
-            reviewRepository.save(review)
+            reviewService.addReview(book.id, member, ReviewRequestDto("리뷰 ㅋㅋ " + i, 5, i>90))
+        }
+        run {
+            val member = memberRepository.findByEmail("email" + 100 + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")
+            reviewService.addReview(book.id, member, ReviewRequestDto(
+                "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Similique dolorum corrupti eaque adipisci dolore exercitationem voluptates, quo obcaecati sint earum aliquam fugit quisquam in sunt cupiditate excepturi error nulla eligendi!",
+                5,
+                true
+                ))
         }
 
         //        Category category = categoryRepository.save(new Category("Test Category"));
@@ -121,13 +128,13 @@ class BaseInitData(
 
 
             memberRepository.save(Member("리뷰쓰는놈", "asdf@asdf.com", "asdfasdfasdf"))
-            reviewRepository.save(
-                Review(
+            reviewService.addReview(
+                1,
+                memberRepository.findByEmail("asdf@asdf.com")?:throw NoSuchElementException("멤버 못찾겠다요"),
+                ReviewRequestDto(
                     "리뷰리뷰",
                     5,
-                    memberRepository.findByEmail("asdf@asdf.com")?:throw NoSuchElementException("멤버 못찾겠다요"),
-                    bookRepository.findById(1).orElseThrow(
-                        Supplier { NoSuchElementException("책 못찾겠다요") })
+                    false
                 )
             )
         } catch (e: Exception) {

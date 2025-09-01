@@ -110,7 +110,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessToken)
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
 
         val resultActions = mvc.perform(
@@ -142,7 +142,7 @@ class ReviewRecommendControllerTest(
 
 
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?: throw RuntimeException("리뷰가 없습니다.")
         mvc!!.perform(
             MockMvcRequestBuilders.post("/reviewRecommend/{review_id}/{isRecommend}", review.id, true)
                 .cookie(Cookie("accessToken", accessToken))
@@ -183,7 +183,7 @@ class ReviewRecommendControllerTest(
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessToken)
 
         val review =
-            reviewService.findLatest().orElseThrow<RuntimeException?>(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?: throw RuntimeException("리뷰가 없습니다.")
         mvc.perform(
             MockMvcRequestBuilders.post("/reviewRecommend/{review_id}/{isRecommend}", review.id, true)
                 .cookie(Cookie("accessToken", accessToken))
@@ -209,7 +209,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessToken)
         val review =
-            reviewService.findLatest().orElseThrow<RuntimeException?>(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?: throw RuntimeException("리뷰가 없습니다.")
         val resultActions = createRecommendReview(-1, true, accessToken)
         resultActions
             .andExpect(MockMvcResultMatchers.handler().handlerType(ReviewRecommendController::class.java))
@@ -229,7 +229,7 @@ class ReviewRecommendControllerTest(
 
 
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?: throw RuntimeException("리뷰가 없습니다.")
 
         for (i in accessTokens.indices) {
             val isRecommend = i % 2 == 0 // 짝수 인덱스는 추천, 홀수 인덱스는 비추천
@@ -253,7 +253,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
         for (i in accessTokens.indices) {
             val isRecommend = i % 2 == 0 // 짝수 인덱스는 추천, 홀수 인덱스는 비추천
@@ -277,7 +277,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?: throw RuntimeException("리뷰가 없습니다.")
 
         createRecommendReview(review.id, true, accessTokens.get(0)).andDo(MockMvcResultHandlers.print())
 
@@ -298,7 +298,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
         val resultActions = updateRecommendReview(review.id, true, accessTokens.get(0))
         resultActions
@@ -317,7 +317,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
         createRecommendReview(review.id, true, accessTokens.get(0)).andDo(MockMvcResultHandlers.print())
 
@@ -338,7 +338,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
         val resultActions = deleteRecommendReview(review.id, accessTokens.get(0))
         resultActions
@@ -357,7 +357,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
         val resultActions = deleteRecommendReview(-1, accessTokens.get(0))
         resultActions
@@ -376,7 +376,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
 
         createRecommendReview(review.id, true, accessTokens.get(0)).andDo(MockMvcResultHandlers.print())
         deleteRecommendReview(review.id, accessTokens.get(0)).andDo(MockMvcResultHandlers.print())
@@ -400,7 +400,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         var review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         val threadCount = 20
         val executor = Executors.newFixedThreadPool(threadCount)
         val latch = CountDownLatch(memberCount)
@@ -440,7 +440,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         var review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         val threadCount = 20
         val executor = Executors.newFixedThreadPool(threadCount)
         val latch = CountDownLatch(memberCount)
@@ -502,7 +502,7 @@ class ReviewRecommendControllerTest(
         val book = bookRepository.findAll().get(0)
         createReview(book.id, "이 책 정말 좋았어요!", 5, accessTokens.get(0))
         var review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         val threadCount = 20
         val executor = Executors.newFixedThreadPool(threadCount)
         val latch = CountDownLatch(memberCount)
