@@ -67,7 +67,6 @@ class SecurityConfig(
                         userInfo.userService(customOAuth2UserService)
                     }
                     .successHandler(customOAuth2LoginSuccessHandler)
-                    .failureUrl("/oauth2/failure")
             }
             .httpBasic{ it.disable() }
             .formLogin{ it.disable() }
