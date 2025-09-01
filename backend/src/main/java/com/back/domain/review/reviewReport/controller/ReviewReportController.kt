@@ -24,6 +24,4 @@ class ReviewReportController(
         reviewReportService.create(reviewId, member, reviewReportCreateDto)
         return RsData("201-1", "success to create review report")
     }
-
-
 }

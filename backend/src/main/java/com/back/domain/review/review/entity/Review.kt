@@ -3,6 +3,7 @@ package com.back.domain.review.review.entity
 import com.back.domain.book.book.entity.Book
 import com.back.domain.member.member.entity.Member
 import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
+import com.back.domain.review.reviewReport.entity.ReviewReport
 import com.back.global.jpa.entity.BaseEntity
 import jakarta.persistence.*
 
@@ -20,6 +21,7 @@ class Review //    @Version
 ) : BaseEntity() {
     @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, orphanRemoval = true, cascade = [CascadeType.ALL])
     private val reviewRecommends: MutableList<ReviewRecommend> = ArrayList()
+
     var deleted = false
 
     var likeCount = 0
