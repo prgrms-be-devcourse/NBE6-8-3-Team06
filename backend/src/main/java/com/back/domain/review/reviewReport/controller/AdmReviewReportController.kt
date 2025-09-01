@@ -18,9 +18,10 @@ class AdmReviewReportController(
     @GetMapping
     fun search(
         @PageableDefault pageable: Pageable,
-        @RequestParam keyword: String?
+        @RequestParam keyword: String?,
+        @RequestParam processed: Boolean = false,
     ):RsData<Page<ReviewReportResponseDto>> {
-        val reviewReportPage = reviewReportService.search(keyword, pageable)
+        val reviewReportPage = reviewReportService.search(keyword, pageable, processed)
         return RsData("200-1", "review successfully searched", reviewReportPage)
     }
 }

@@ -17,8 +17,8 @@ class ReviewReportService(
     private val reviewService: ReviewService,
 ) {
 
-    fun search(keyword: String?, pageable: Pageable): Page<ReviewReportResponseDto> {
-        val reviewReportPage = reviewReportRepository.search(keyword, pageable)
+    fun search(keyword: String?, pageable: Pageable, processed: Boolean): Page<ReviewReportResponseDto> {
+        val reviewReportPage = reviewReportRepository.search(keyword, pageable, processed)
         return reviewReportDtoService.pageEntity2pageResponseDto(reviewReportPage);
     }
 

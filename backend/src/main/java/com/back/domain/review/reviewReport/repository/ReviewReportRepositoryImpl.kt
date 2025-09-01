@@ -16,10 +16,13 @@ class ReviewReportRepositoryImpl(
 
     override fun search(
         keyword: String?,
-        pageable: Pageable
+        pageable: Pageable,
+        processed: Boolean
     ): Page<ReviewReport> {
         val specifiers = QuerydslUtil.toOrderSpecifiers(pageable.sort, QReviewReport.reviewReport)
         val booleanBuilder = QuerydslUtil.buildKeywordPredicate("reason", keyword, QReviewReport.reviewReport)?: BooleanBuilder()
+        booleanBuilder.and(QReviewReport.reviewReport.processed.eq(processed))
+
         val data = queryFactory
             .selectFrom(QReviewReport.reviewReport)
             .where(booleanBuilder)
@@ -27,6 +30,7 @@ class ReviewReportRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .orderBy(*specifiers.toTypedArray())
             .fetch()
+
         val total = queryFactory
             .select(QReviewReport.reviewReport.count())
             .from(QReviewReport.reviewReport)
