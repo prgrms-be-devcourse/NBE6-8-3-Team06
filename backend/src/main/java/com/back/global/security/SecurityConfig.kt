@@ -58,6 +58,10 @@ class SecurityConfig(
                 jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter::class.java
             )
+            .oauth2Login { it ->
+                it.defaultSuccessUrl("/oauth2/success")
+                it.failureUrl("/oauth2/failure")
+            }
             .httpBasic{ it.disable() }
             .formLogin{ it.disable() }
             .logout { it.disable() }

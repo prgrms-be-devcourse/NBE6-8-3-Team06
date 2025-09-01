@@ -1,6 +1,8 @@
 spring:
   application:
     name: back
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     default: dev
   output:
@@ -21,6 +23,16 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_ID}
+            scope: profile_nickname
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 logging:
@@ -31,7 +43,7 @@ logging:
     com.back: DEBUG
 custom:
   jwt:
-    secretKey: abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
+    secretKey: ${CUSTOM__JWT__SECRET_KEY}
   accessToken:
     expirationSeconds: 1200
   refreshToken:
