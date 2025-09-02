@@ -115,3 +115,45 @@ export const useReview = (initBookId:number) =>{
       setBookId
   }
 }
+
+export const ReviewReport = () => {
+  
+  const createReviewReport = async(reviewId:number) => {
+    const res = await apiFetch<ApiResponse>(`/reviews/${reviewId}`, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+      }
+    });
+    const data:Object = res.data;
+    return data
+  }
+
+  const admSearchReviewReport = async(page:number, proceed:boolean)=>{
+    const res = await apiFetch<ApiResponse>(`/adm/reviews/report`,{
+      method:"GET",
+      headers:{
+        "Content-Type":"application/json"
+      }
+    });
+  }
+
+  const admGetReviewReport = async(reportId:number)=>{
+    const res = await apiFetch<ApiResponse>(`/adm/reviews/report/${reportId}`, {
+      method:"GET",
+      headers:{
+        "Content-Type":"application/json"
+      }
+    })
+  }
+
+  const admProcessReport = async(reportId:number)=>{
+    const res = await apiFetch<ApiResponse>(`/adm/reviews/report/${reportId}`,{
+      method:"PUT",
+      headers:{
+        "Content-Type":"application/json"
+      }
+    })
+  }
+
+}
