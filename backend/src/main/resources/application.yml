@@ -63,7 +63,7 @@ logging:
     com.back: DEBUG
 custom:
   jwt:
-    secretKey: ${CUSTOM__JWT__SECRET_KEY}
+    secretKey: ${CUSTOM__JWT__SECRET_KEY:mySecretKey123456789012345678901234567890}
   accessToken:
     expirationSeconds: 1200
   refreshToken:
