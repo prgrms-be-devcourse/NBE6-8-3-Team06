@@ -41,8 +41,7 @@ class ReviewReportService(
         }
         when (reviewReportProcessDto.process){
             // 이걸 설정하는 건 계획에 없음
-            ReviewReportState.NOT_REPORTED -> throw ServiceException("400-2", "Wrong review report state")
-            ReviewReportState.PENDING -> throw ServiceException("400-2", "Wrong review report state")
+            ReviewReportState.NOT_REPORTED, ReviewReportState.PENDING  -> throw ServiceException("400-2", "Wrong review report state")
 
             else->{
                 val review = reviewReport.review

@@ -51,9 +51,12 @@ class ReviewDtoService(
     fun updateReviewFromRequest(review: Review, reviewRequestDto: ReviewRequestDto) {
         review.content = reviewRequestDto.content
         review.rate = reviewRequestDto.rate
-        if (review.reportState == ReviewReportState.EDIT_REQUIRED){
-            review.reportState = ReviewReportState.NOT_REPORTED
-            review.adminMessage = null
+        when (review.reportState) {
+            ReviewReportState.EDIT_REQUIRED, ReviewReportState.ACCEPT -> {
+                review.reportState = ReviewReportState.NOT_REPORTED
+                review.adminMessage = null
+            }
+            else->{}
         }
     }
 

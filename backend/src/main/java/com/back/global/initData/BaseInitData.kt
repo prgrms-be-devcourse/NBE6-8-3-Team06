@@ -67,7 +67,7 @@ class BaseInitData(
             memberService.join("testUser" + i, "email" + i + "@a.a", passwordEncoder.encode("password" + i))
         }
 
-        val adminAccount = Member("admin", "admin@a.a", "admin", MemberRole.ADMIN)
+        val adminAccount = Member("admin", "admin@a.a",passwordEncoder.encode("admin"), MemberRole.ADMIN)
         memberRepository.save(adminAccount)
 
         val book = bookRepository.findAll().get(0) // 첫 번째 책을 가져옴
