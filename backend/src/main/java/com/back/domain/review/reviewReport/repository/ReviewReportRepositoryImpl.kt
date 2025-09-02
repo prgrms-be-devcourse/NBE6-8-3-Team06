@@ -21,7 +21,10 @@ class ReviewReportRepositoryImpl(
     ): Page<ReviewReport> {
         val specifiers = QuerydslUtil.toOrderSpecifiers(pageable.sort, QReviewReport.reviewReport)
         val booleanBuilder = QuerydslUtil.buildKeywordPredicate("reason", keyword, QReviewReport.reviewReport)?: BooleanBuilder()
-        booleanBuilder.and(QReviewReport.reviewReport.processed.ne(ReviewReportState.PENDING))
+        if (processed)
+            booleanBuilder.and(QReviewReport.reviewReport.processed.ne(ReviewReportState.PENDING))
+        else
+            booleanBuilder.and(QReviewReport.reviewReport.processed.eq(ReviewReportState.PENDING))
 
         val data = queryFactory
             .selectFrom(QReviewReport.reviewReport)
