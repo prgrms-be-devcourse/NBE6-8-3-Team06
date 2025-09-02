@@ -3,7 +3,9 @@ package com.back.domain.review.review.entity
 import com.back.domain.book.book.entity.Book
 import com.back.domain.member.member.entity.Member
 import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
+import com.back.domain.review.reviewReport.dto.ReviewReportProcessDto
 import com.back.domain.review.reviewReport.entity.ReviewReport
+import com.back.domain.review.reviewReport.entity.ReviewReportState
 import com.back.global.jpa.entity.BaseEntity
 import jakarta.persistence.*
 
@@ -19,15 +21,16 @@ class Review //    @Version
     @field:ManyToOne(fetch = FetchType.LAZY)
     var book: Book
 ) : BaseEntity() {
-    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, orphanRemoval = true, cascade = [CascadeType.ALL])
-    private val reviewRecommends: MutableList<ReviewRecommend> = ArrayList()
 
     var deleted = false
 
     var likeCount = 0
 
-
     var dislikeCount = 0
+
+    @Enumerated(EnumType.STRING)
+    var reportState: ReviewReportState = ReviewReportState.NOT_REPORTED
+    var adminMessage: String? = null
 
     fun incLike() {
         this.likeCount++
@@ -43,5 +46,10 @@ class Review //    @Version
 
     fun decDislike() {
         this.dislikeCount--
+    }
+
+    fun updateReport(reviewReportProcessDto: ReviewReportProcessDto) {
+        this.reportState = reviewReportProcessDto.process
+        this.adminMessage = reviewReportProcessDto.answer
     }
 }

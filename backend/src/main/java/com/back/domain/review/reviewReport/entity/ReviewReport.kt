@@ -20,7 +20,7 @@ data class ReviewReport(
 
     var answer: String? = null
     @Enumerated(EnumType.STRING)
-    var processed: ReviewReportProcess = ReviewReportProcess.PENDING
+    var processed: ReviewReportState = ReviewReportState.PENDING
 
     fun modify(reviewReportProcessDto: ReviewReportProcessDto) {
         this.processed = reviewReportProcessDto.process

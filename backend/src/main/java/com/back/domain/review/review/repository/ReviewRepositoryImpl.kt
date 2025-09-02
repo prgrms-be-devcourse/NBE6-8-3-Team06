@@ -4,6 +4,7 @@ import com.back.domain.book.book.entity.Book
 import com.back.domain.member.member.entity.Member
 import com.back.domain.review.review.entity.QReview
 import com.back.domain.review.review.entity.Review
+import com.back.domain.review.reviewReport.entity.ReviewReportState
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
@@ -68,6 +69,7 @@ class ReviewRepositoryImpl(
         val booleanBuilder = BooleanBuilder()
         booleanBuilder.and(QReview.review.book.eq(book))
         booleanBuilder.and(QReview.review.deleted.eq(false))
+        booleanBuilder.and(QReview.review.reportState.ne(ReviewReportState.EDIT_REQUIRED))
         val reviewPage = queryFactory
             .selectFrom(QReview.review)
             .where(booleanBuilder)

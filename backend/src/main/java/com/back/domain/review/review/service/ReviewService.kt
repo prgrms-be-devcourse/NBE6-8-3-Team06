@@ -75,7 +75,9 @@ class ReviewService(
     }
 
     fun findById(reviewId: Int): Review? {
-        return reviewRepository.findById(reviewId).orElse(null)
+        return reviewRepository.findById(reviewId).orElse(null)?.let {
+            if (it.deleted) null else it
+        }
     }
 
     fun findByBookOrderByCreateDateDesc(book: Book, pageable: Pageable): Page<Review> {

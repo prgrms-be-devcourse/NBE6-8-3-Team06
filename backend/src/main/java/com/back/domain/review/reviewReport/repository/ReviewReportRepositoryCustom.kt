@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable
 
 interface ReviewReportRepositoryCustom {
 
-    fun search(keyword: String?, pageable: Pageable, processed:Boolean): Page<ReviewReport>
+    fun search(keyword: String?, pageable: Pageable, processed: Boolean): Page<ReviewReport>
 }

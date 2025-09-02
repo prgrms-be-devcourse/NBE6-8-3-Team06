@@ -6,6 +6,7 @@ import com.back.domain.review.review.dto.ReviewRequestDto
 import com.back.domain.review.review.dto.ReviewResponseDto
 import com.back.domain.review.review.entity.Review
 import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
+import com.back.domain.review.reviewReport.entity.ReviewReportState
 import com.back.global.dto.PageResponseDto
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -31,6 +32,8 @@ class ReviewDtoService(
         createdDate = review.createDate,
         modifiedDate = review.modifyDate,
         spoiler = review.spoiler,
+        reportState = review.reportState,
+        adminMessage = review.adminMessage,
     )
         return reviewResponseDto
     }
@@ -48,6 +51,10 @@ class ReviewDtoService(
     fun updateReviewFromRequest(review: Review, reviewRequestDto: ReviewRequestDto) {
         review.content = reviewRequestDto.content
         review.rate = reviewRequestDto.rate
+        if (review.reportState == ReviewReportState.EDIT_REQUIRED){
+            review.reportState = ReviewReportState.NOT_REPORTED
+            review.adminMessage = null
+        }
     }
 
     fun reviewsToReviewResponseDtos(reviewPage: Page<Review>, member: Member): PageResponseDto<ReviewResponseDto> {

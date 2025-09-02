@@ -2,13 +2,13 @@ package com.back.domain.review.reviewReport.repository
 
 import com.back.domain.review.reviewReport.entity.QReviewReport
 import com.back.domain.review.reviewReport.entity.ReviewReport
+import com.back.domain.review.reviewReport.entity.ReviewReportState
 import com.back.global.jpa.querydsl.QuerydslUtil
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
-import org.springframework.web.client.HttpServerErrorException
 
 class ReviewReportRepositoryImpl(
     private val queryFactory: JPAQueryFactory
@@ -21,7 +21,7 @@ class ReviewReportRepositoryImpl(
     ): Page<ReviewReport> {
         val specifiers = QuerydslUtil.toOrderSpecifiers(pageable.sort, QReviewReport.reviewReport)
         val booleanBuilder = QuerydslUtil.buildKeywordPredicate("reason", keyword, QReviewReport.reviewReport)?: BooleanBuilder()
-        booleanBuilder.and(QReviewReport.reviewReport.processed.eq(processed))
+        booleanBuilder.and(QReviewReport.reviewReport.processed.ne(ReviewReportState.PENDING))
 
         val data = queryFactory
             .selectFrom(QReviewReport.reviewReport)

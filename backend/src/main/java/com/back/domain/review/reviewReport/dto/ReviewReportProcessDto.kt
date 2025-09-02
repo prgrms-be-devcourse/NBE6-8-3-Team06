@@ -1,8 +1,8 @@
 package com.back.domain.review.reviewReport.dto
 
-import com.back.domain.review.reviewReport.entity.ReviewReportProcess
+import com.back.domain.review.reviewReport.entity.ReviewReportState
 
 data class ReviewReportProcessDto(
-    val process: ReviewReportProcess,
+    val process: ReviewReportState,
     val answer: String,
 )
