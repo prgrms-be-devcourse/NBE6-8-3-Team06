@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.function.Supplier
 
 @RestController
-@RequestMapping("/reviews")
+@RequestMapping("/reviews/{book_id}")
 class ReviewController(
     private val reviewService: ReviewService,
     private val reviewDtoService: ReviewDtoService,
@@ -25,13 +25,10 @@ class ReviewController(
 ) {
 
 
-    @GetMapping("/{book_id}")
+    @GetMapping
     fun getReview(@PathVariable("book_id") bookId: Int): RsData<ReviewResponseDto> {
-        val book = bookRepository.findById(bookId)
-            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val member: Member = rq.getAuthenticatedActor()
-        val review = reviewService.findByBookAndMember(book, member)
-            .orElseThrow(Supplier { NoSuchElementException("Review not found") })
+        val review = reviewService.findByBookAndMember(bookId, member)?: throw NoSuchElementException("Review not found")
         return RsData(
             "200-1",
             "Review read successfully",
@@ -39,50 +36,42 @@ class ReviewController(
         )
     }
 
-    @GetMapping("/{book_id}/list")
+    @GetMapping("/list")
     fun getReviews(
         @PathVariable("book_id") bookId: Int,
         @PageableDefault(size = 10, sort = ["id"], direction = Sort.Direction.DESC) pageable: Pageable
     ): RsData<PageResponseDto<ReviewResponseDto>> {
-        val book = bookRepository.findById(bookId)
-            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val member: Member = rq.getAuthenticatedActor()
-        val reviews = reviewService.getPageReviewResponseDto(book, pageable, member)
+        val reviews = reviewService.getPageReviewResponseDto(bookId, pageable, member)
         return RsData("200-1", "Reviews fetched successfully", reviews)
     }
 
-    @PostMapping("/{book_id}")
+    @PostMapping
     fun create(
         @PathVariable("book_id") bookId: Int,
         @RequestBody reviewRequestDto: ReviewRequestDto
     ): RsData<Void> {
-        val book = bookRepository.findById(bookId)
-            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val member = rq.getAuthenticatedActor()
-        reviewService.addReview(book, member, reviewRequestDto)
+        reviewService.addReview(bookId, member, reviewRequestDto)
         return RsData("201-1", "Reviews fetched successfully")
     }
 
-    @DeleteMapping("/{book_id}")
+    @DeleteMapping
     fun delete(
         @PathVariable("book_id") bookId: Int
     ): RsData<Void> {
-        val book = bookRepository.findById(bookId)
-            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val member: Member = rq.getAuthenticatedActor()
-        reviewService.deleteReview(book, member)
+        reviewService.deleteReview(bookId, member)
         return RsData("200-1", "Review deleted successfully")
     }
 
-    @PutMapping("/{book_id}")
+    @PutMapping
     fun modify(
         @PathVariable("book_id") bookId: Int,
         @RequestBody reviewRequestDto: ReviewRequestDto
     ): RsData<Void> {
-        val book = bookRepository.findById(bookId)
-            .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val member: Member = rq.getAuthenticatedActor()
-        reviewService.modifyReview(book, member, reviewRequestDto)
+        reviewService.modifyReview(bookId, member, reviewRequestDto)
         return RsData("200-1", "Review modified successfully")
     }
 }

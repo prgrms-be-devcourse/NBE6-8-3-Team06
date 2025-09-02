@@ -64,7 +64,7 @@ class ReviewControllerTest(
         val book = bookRepository.findAll().get(1)
         val resultActions = addReview(book.id, accessToken)
         val review =
-            reviewService.findLatest().orElseThrow<RuntimeException?>(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?: throw RuntimeException("리뷰가 없습니다.")
         resultActions
             .andExpect(MockMvcResultMatchers.handler().handlerType(ReviewController::class.java))
             .andExpect(MockMvcResultMatchers.handler().methodName("create"))
@@ -106,7 +106,7 @@ class ReviewControllerTest(
         val book = bookRepository.findAll().get(1)
         addReview(book.id, accessToken)
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         AssertionsForClassTypes.assertThat(review.id).isGreaterThan(0)
 
         val resultActions = mvc.perform(
@@ -122,7 +122,7 @@ class ReviewControllerTest(
             .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("200-1"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("Review deleted successfully"))
 
-        assertThat<Review>(reviewService.findById(review.id)).isEmpty()
+        assertThat<Review>(reviewService.findById(review.id)).isNull()
     }
 
     @Test
@@ -134,7 +134,7 @@ class ReviewControllerTest(
         val book = bookRepository.findAll().get(1)
         addReview(book.id, accessToken)
         var review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         AssertionsForClassTypes.assertThat(review.id).isGreaterThan(0)
         val resultActions = mvc.perform(
             MockMvcRequestBuilders.put("/reviews/{book_id}", book.id)
@@ -156,7 +156,7 @@ class ReviewControllerTest(
             .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("200-1"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("Review modified successfully"))
 
-        review = reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+        review = reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         assertThat(review.id).isGreaterThan(0)
         assertThat(review.content).isEqualTo("다시 읽다보니 그렇게 좋지는 않네요.")
         assertThat(review.rate).isEqualTo(4)
@@ -171,7 +171,7 @@ class ReviewControllerTest(
         val book = bookRepository.findAll().get(1)
         addReview(book.id, accessToken)
         val review =
-            reviewService.findLatest().orElseThrow(Supplier { RuntimeException("리뷰가 없습니다.") })
+            reviewService.findLatest()?:throw RuntimeException("리뷰가 없습니다.")
         AssertionsForClassTypes.assertThat(review.id).isGreaterThan(0)
 
         val resultActions = mvc.perform(
