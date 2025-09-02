@@ -1,8 +1,6 @@
 package com.back.global.rsData
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.querydsl.core.types.Projections.constructor
-import org.springframework.lang.NonNull
 
 
 data class RsData<T>(

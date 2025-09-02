@@ -3,21 +3,17 @@ package com.back.domain.note.controller
 import com.back.domain.member.member.entity.Member
 import com.back.domain.note.dto.NoteDto
 import com.back.domain.note.dto.NotePageDto
-import com.back.domain.note.entity.Note
 import com.back.domain.note.service.NoteService
 import com.back.global.rq.Rq
 import com.back.global.rsData.RsData
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
-import lombok.RequiredArgsConstructor
 import org.hibernate.validator.constraints.Length
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import java.util.stream.Collectors
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("bookmarks/{bookmarkId}/notes")
 class NoteController (
     private val noteService: NoteService,

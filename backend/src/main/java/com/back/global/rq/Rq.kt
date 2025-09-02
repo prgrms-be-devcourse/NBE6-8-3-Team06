@@ -1,22 +1,21 @@
 package com.back.global.rq
 
 import com.back.domain.member.member.entity.Member
+import com.back.domain.member.member.service.MemberService
 import com.back.global.security.SecurityUser
+import com.back.standard.extensions.getOrThrow
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import lombok.RequiredArgsConstructor
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import java.util.*
-import java.util.function.Function
-import java.util.function.Predicate
+
 
 @Component
 class Rq(
     private val req: HttpServletRequest,
-    private val resp: HttpServletResponse
+    private val resp: HttpServletResponse,
+    private val memberService: MemberService
 ) {
     companion object {
         private const val ACCESS_TOKEN_DURATION = 60 * 20 // 20분
@@ -33,6 +32,8 @@ class Rq(
             ?.let { it as? SecurityUser }
             ?.member
 
+    val actorFromDb: Member
+            get() = memberService.findById(getAuthenticatedActor().id).getOrThrow()
 
     fun getAuthenticatedActor(): Member = actor
             ?: throw IllegalStateException("인증된 사용자 정보를 찾을 수 없습니다")
@@ -62,5 +63,9 @@ class Rq(
         listOf("accessToken", "refreshToken").forEach { name ->
             setCookie(name, "")
         }
+    }
+
+    fun sendRedirect(url: String) {
+        resp.sendRedirect(url)
     }
 }

@@ -5,7 +5,6 @@ import com.back.domain.bookmarks.service.BookmarkService
 import com.back.global.dto.PageResponseDto
 import com.back.global.rq.Rq
 import com.back.global.rsData.RsData
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault

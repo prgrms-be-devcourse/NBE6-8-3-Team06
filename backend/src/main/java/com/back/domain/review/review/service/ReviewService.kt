@@ -11,7 +11,6 @@ import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
 import com.back.global.dto.PageResponseDto
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

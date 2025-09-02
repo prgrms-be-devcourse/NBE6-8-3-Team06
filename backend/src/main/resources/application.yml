@@ -1,6 +1,8 @@
 spring:
   application:
     name: back
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     default: dev
   output:
@@ -21,6 +23,24 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_ID}
+            client-secret: ${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__KAKAO__CLIENT_SECRET}
+            scope: profile_nickname
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: 'http://localhost:8080/login/oauth2/code/kakao'
+            client-authentication-method: client_secret_post
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 logging:
@@ -28,10 +48,15 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.oauth2.client: DEBUG
+    org.springframework.security.oauth2.client.userinfo: DEBUG
+    org.springframework.security.web: DEBUG
+    org.springframework.web.client: DEBUG
     com.back: DEBUG
 custom:
   jwt:
-    secretKey: abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
+    secretKey: ${CUSTOM__JWT__SECRET_KEY}
   accessToken:
     expirationSeconds: 1200
   refreshToken:

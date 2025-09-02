@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope: profile_nickname
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+custom:
+  jwt:
+    secretKey: test-secret-key-for-jwt-token-generation-and-validation-in-unit-tests-environment
+  accessToken:
+    expirationSeconds: 1200
+  refreshToken:
+    expirationSeconds: 86400
+
+logging:
+  level:
+    com.back: DEBUG
+    org.springframework.security: DEBUG

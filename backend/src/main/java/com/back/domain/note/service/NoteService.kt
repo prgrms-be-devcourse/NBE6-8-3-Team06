@@ -7,12 +7,10 @@ import com.back.domain.note.dto.BookDto
 import com.back.domain.note.entity.Note
 import com.back.domain.note.repository.NoteRepository
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
-@RequiredArgsConstructor
 class NoteService (
     private val noteRepository: NoteRepository,
     private val bookmarkRepository: BookmarkRepository

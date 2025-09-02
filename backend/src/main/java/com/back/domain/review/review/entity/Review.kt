@@ -5,9 +5,6 @@ import com.back.domain.member.member.entity.Member
 import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
 import com.back.global.jpa.entity.BaseEntity
 import jakarta.persistence.*
-import lombok.Getter
-import lombok.NoArgsConstructor
-import lombok.Setter
 
 @Entity
 class Review //    @Version
