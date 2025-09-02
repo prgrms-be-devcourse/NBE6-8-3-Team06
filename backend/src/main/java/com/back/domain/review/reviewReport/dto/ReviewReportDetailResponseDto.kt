@@ -8,7 +8,10 @@ data class ReviewReportDetailResponseDto(
     val id: Int,
     val reason: String,
     val description: String,
+    val memberName: String,
     val createdDate: LocalDateTime,
     val reportState: ReviewReportState,
     val review: ReviewDetailResponseDto,
+    val bookName: String,
+    val bookAuthor: String,
 )

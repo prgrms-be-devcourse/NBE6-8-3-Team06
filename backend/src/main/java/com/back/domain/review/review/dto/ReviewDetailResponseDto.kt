@@ -5,5 +5,4 @@ data class ReviewDetailResponseDto(
     val content: String,
     val rate: Int,
     val memberName: String,
-
 )

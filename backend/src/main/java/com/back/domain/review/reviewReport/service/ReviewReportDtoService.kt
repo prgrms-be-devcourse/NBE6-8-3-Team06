@@ -18,7 +18,11 @@ class ReviewReportDtoService{
             id = reviewReport.id,
             createdDate = reviewReport.createDate,
             reason = reviewReport.reason,
-            memberName = reviewReport.review.member.getName()
+            memberName = reviewReport.member.getName(),
+            description = reviewReport.description,
+            reportState = reviewReport.processed,
+            reviewAuthor = reviewReport.review.member.getName(),
+            bookName = reviewReport.review.book.title,
         )
     }
 
@@ -43,6 +47,9 @@ class ReviewReportDtoService{
             createdDate = reviewReport.createDate,
             reportState = reviewReport.processed,
             review = reviewDetailResponseDto,
+            bookName = reviewReport.review.book.title,
+            bookAuthor = reviewReport.review.book.authors.first().author.name,
+            memberName = reviewReport.member.getName(),
         )
     }
 }
