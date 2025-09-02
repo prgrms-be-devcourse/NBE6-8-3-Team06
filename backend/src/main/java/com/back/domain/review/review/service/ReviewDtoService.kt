@@ -2,6 +2,7 @@ package com.back.domain.review.review.service
 
 import com.back.domain.book.book.entity.Book
 import com.back.domain.member.member.entity.Member
+import com.back.domain.review.review.dto.ReviewDetailResponseDto
 import com.back.domain.review.review.dto.ReviewRequestDto
 import com.back.domain.review.review.dto.ReviewResponseDto
 import com.back.domain.review.review.entity.Review
@@ -67,5 +68,14 @@ class ReviewDtoService(
                 member = member
             )
         }))
+    }
+
+    fun entity2detailResponseDto(review: Review): ReviewDetailResponseDto{
+        return ReviewDetailResponseDto(
+            id = review.id,
+            content = review.content,
+            rate = review.rate,
+            memberName = review.member.getName()
+        )
     }
 }

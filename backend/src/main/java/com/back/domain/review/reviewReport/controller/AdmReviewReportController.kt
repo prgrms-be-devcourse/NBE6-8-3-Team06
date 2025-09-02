@@ -1,5 +1,6 @@
 package com.back.domain.review.reviewReport.controller
 
+import com.back.domain.review.reviewReport.dto.ReviewReportDetailResponseDto
 import com.back.domain.review.reviewReport.dto.ReviewReportProcessDto
 import com.back.domain.review.reviewReport.dto.ReviewReportResponseDto
 import com.back.domain.review.reviewReport.service.ReviewReportService
@@ -31,6 +32,15 @@ class AdmReviewReportController(
     ):RsData<Page<ReviewReportResponseDto>> {
         val reviewReportPage = reviewReportService.search(keyword, pageable, processed)
         return RsData("200-1", "review successfully searched", reviewReportPage)
+    }
+
+    @GetMapping("/{report_id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    fun getReport(
+        @PathVariable("report_id") reportId: Int,
+    ):RsData<ReviewReportDetailResponseDto>{
+        val reviewReport = reviewReportService.getReport(reportId)
+        return RsData("200-1", "review successfully get", reviewReport)
     }
 
     @PutMapping("/{report_id}")

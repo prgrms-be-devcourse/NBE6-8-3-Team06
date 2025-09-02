@@ -16,6 +16,7 @@ data class ReviewReport(
     @ManyToOne
     var member: Member,
     var reason: String,
+    var description: String,
 ): BaseEntity(){
 
     var answer: String? = null
