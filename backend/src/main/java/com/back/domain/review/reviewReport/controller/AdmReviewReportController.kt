@@ -7,19 +7,23 @@ import com.back.global.rsData.RsData
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-@RestController("/adm/review/report")
+@RestController
+@RequestMapping("/adm/reviews/report")
 class AdmReviewReportController(
     private val reviewReportService: ReviewReportService
 ) {
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     fun search(
         @PageableDefault pageable: Pageable,
         @RequestParam keyword: String?,
@@ -30,11 +34,12 @@ class AdmReviewReportController(
     }
 
     @PutMapping("/{report_id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     fun process(
         @PathVariable("report_id") reportId: Int,
         @RequestBody reviewReportProcessDto: ReviewReportProcessDto
     ): RsData<Void>{
         reviewReportService.process(reportId, reviewReportProcessDto)
-        return RsData("200-1", "review report successfully")
+        return RsData("200-1", "review successfully proceed")
     }
 }
