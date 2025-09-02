@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import BookCard from "@/components/BookCard";
-import { Search, BookOpen, Star, Filter, Plus } from "lucide-react";
+import { Search, BookOpen, Star, Filter, Plus, ChevronDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -58,6 +58,7 @@ export default function BooksPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const router = useRouter();
   const pathName = usePathname();
   const { isLoggedIn } = useAuth();
@@ -69,13 +70,20 @@ export default function BooksPage() {
     try {
       const response = await getCategories();
       console.log("📂 카테고리 목록:", response);
-      if (response && Array.isArray(response)) {
+      
+      // API 공통 응답 형태 처리
+      if (response && response.data && Array.isArray(response.data)) {
+        setCategories(["all", ...response.data.map((cat: Category) => cat.name)]);
+      } else if (response && Array.isArray(response)) {
+        // 직접 배열이 반환되는 경우
         setCategories(["all", ...response.map((cat: Category) => cat.name)]);
-      } else if (response && (response as any).data && Array.isArray((response as any).data)) {
-        setCategories(["all", ...(response as any).data.map((cat: Category) => cat.name)]);
+      } else {
+        console.warn("⚠️ 예상하지 못한 카테고리 응답 구조:", response);
+        setCategories(["all"]);
       }
     } catch (error) {
       console.error("❌ 카테고리 목록 조회 실패:", error);
+      // 에러가 발생해도 기본 카테고리는 제공
       setCategories(["all"]);
     }
   };
@@ -160,6 +168,7 @@ export default function BooksPage() {
     setCurrentPage(0);
     setIsSearching(false);
     setSearchTerm('');
+    setIsCategoryMenuOpen(false);
     loadBooks(0, undefined, undefined, category);
   };
 
@@ -180,6 +189,21 @@ export default function BooksPage() {
     loadBooks(0);
     loadCategories();
   }, []);
+
+  // 카테고리 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isCategoryMenuOpen && !target.closest('[data-category-menu]')) {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCategoryMenuOpen]);
 
   useEffect(() => {
     if (isSearching && searchTerm.trim()) {
@@ -354,18 +378,59 @@ export default function BooksPage() {
               전체보기
             </Button>
           )}
-          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="카테고리 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category === "all" ? "모든 카테고리" : category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative" data-category-menu>
+            <Button
+              variant="outline"
+              onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+              className="w-full sm:w-48 justify-between"
+            >
+              {selectedCategory === "all" ? "모든 카테고리" : selectedCategory}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isCategoryMenuOpen ? 'rotate-180' : ''}`} />
+            </Button>
+            {isCategoryMenuOpen && (
+              <div className="absolute top-full left-0 z-10 mt-1 bg-background border rounded-md shadow-lg max-h-96 overflow-y-auto w-[500px] sm:w-[700px] lg:w-[800px]">
+                <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-7 gap-2 p-3">
+                  {categories
+                    .slice()
+                    .sort((a, b) => {
+                      // "all" 카테고리는 항상 맨 앞에
+                      if (a === "all") return -1;
+                      if (b === "all") return 1;
+                      // 나머지는 가나다순 정렬
+                      return a.localeCompare(b, 'ko');
+                    })
+                    .map((category) => {
+                      const displayText = category === "all" ? "모든 카테고리" : category;
+                      const textLength = displayText.length;
+                      
+                      return (
+                        <Button
+                          key={category}
+                          variant={selectedCategory === category ? "default" : "ghost"}
+                          onClick={() => handleCategoryChange(category)}
+                          size="sm"
+                          className="justify-center h-10 px-1 font-normal min-w-0 flex-shrink-0"
+                          style={{
+                            fontSize: textLength > 8 
+                              ? '0.7rem' 
+                              : textLength > 6 
+                              ? '0.75rem' 
+                              : textLength > 4 
+                              ? '0.8rem' 
+                              : '0.85rem',
+                            lineHeight: '1.2'
+                          }}
+                        >
+                          <span className="truncate w-full text-center">
+                            {displayText}
+                          </span>
+                        </Button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="정렬 기준" />
