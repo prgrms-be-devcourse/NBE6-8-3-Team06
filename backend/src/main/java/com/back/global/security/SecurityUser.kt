@@ -11,11 +11,11 @@ data class SecurityUser(
     private val attributes: Map<String, Any> = emptyMap()
 ) : UserDetails, OAuth2User {
     
-    // UserDetails 구현 (기존 방식 유지)
+    // UserDetails 구현
     override fun getUsername(): String = member.getEmail()
     override fun getPassword(): String = member.getPassword()
     override fun getAuthorities(): Collection<GrantedAuthority> =
-        listOf(SimpleGrantedAuthority("ROLE_USER"))
+        listOf(SimpleGrantedAuthority(member.getRole().value))
     override fun isAccountNonExpired(): Boolean = true
     override fun isAccountNonLocked(): Boolean = true
     override fun isCredentialsNonExpired(): Boolean = true
@@ -26,12 +26,12 @@ data class SecurityUser(
     override fun getName(): String = member.id.toString()
     
     companion object {
-        // 일반 로그인용 (기존)
+        // 일반 로그인용
         fun create(member: Member): SecurityUser {
             return SecurityUser(member)
         }
         
-        // OAuth2 로그인용 (새로 추가)
+        // OAuth2 로그인용
         fun create(member: Member, attributes: Map<String, Any>): SecurityUser {
             return SecurityUser(member, attributes)
         }

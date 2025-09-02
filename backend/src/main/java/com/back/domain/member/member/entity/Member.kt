@@ -1,13 +1,11 @@
 package com.back.domain.member.member.entity
 
 import com.back.domain.bookmarks.entity.Bookmark
+import com.back.domain.member.member.constant.MemberRole
 import com.back.domain.note.entity.Note
 import com.back.domain.review.review.entity.Review
 import com.back.global.jpa.entity.BaseEntity
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.OneToMany
+import jakarta.persistence.*
 
 @Entity
 class Member(
@@ -15,7 +13,9 @@ class Member(
     @Column(unique = true)
     private var email: String,
     private var password: String,
-    var profileImgUrl: String? = null
+    var profileImgUrl: String? = null,
+    @Enumerated(EnumType.STRING)
+    private var role: MemberRole = MemberRole.USER
 ) : BaseEntity() {
     @Column(length = 1000)
     private var refreshToken: String? = null
@@ -34,10 +34,27 @@ class Member(
         name,
         email,
         "",
-        null
+        null,
+        MemberRole.USER
     ) {
         this.id = id
     }
+    // Admin 계정 생성용 생성자 추가
+    constructor(name: String, email: String, password: String, role: MemberRole) : this(
+        name,
+        email,
+        password,
+        null,
+        role
+    )
+    // 일반 회원 가입용 생성자
+    constructor(name: String, email: String, password: String) : this(
+        name,
+        email,
+        password,
+        null,
+        MemberRole.USER
+    )
 
     fun updateRefreshToken(refreshToken: String?) {
         this.refreshToken = refreshToken
@@ -61,6 +78,14 @@ class Member(
     
     fun getRefreshToken(): String? {
         return refreshToken
+    }
+    
+    fun getRole(): MemberRole {
+        return role
+    }
+    
+    fun setRole(role: MemberRole) {
+        this.role = role
     }
     
     val profileImgUrlOrDefault: String
