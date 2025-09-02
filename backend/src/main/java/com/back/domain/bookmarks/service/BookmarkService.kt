@@ -14,7 +14,6 @@ import com.back.domain.review.review.entity.Review
 import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.review.service.ReviewService
 import com.back.global.exception.ServiceException
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.*
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -154,7 +153,7 @@ class BookmarkService(
         bookmarkRepository.delete(bookmark)
         //리뷰가 있는 경우, 리뷰 삭제
         if (getReview(bookmark) != null) {
-            reviewService.deleteReview(bookmark.book, member)
+            reviewService.deleteReview(bookmark.book.id, member)
         }
     }
 
@@ -191,11 +190,11 @@ class BookmarkService(
     }
 
     private fun getAvgRate(member: Member): Double {
-        return reviewRepository.findAverageRatingByMember(member).orElse(0.0)
+        return reviewRepository.findAverageRatingByMember(member)?:0.0
     }
 
     private fun getReview(bookmark: Bookmark): Review? {
-        return reviewService.findByBookAndMember(bookmark.book, bookmark.member).orElse(null)
+        return reviewService.findByBookAndMember(bookmark.book.id, bookmark.member)
     }
 
     private fun getReadStateByMemberAndBook(member: Member, book: Book): ReadState? {

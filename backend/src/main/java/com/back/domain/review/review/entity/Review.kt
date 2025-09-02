@@ -5,9 +5,6 @@ import com.back.domain.member.member.entity.Member
 import com.back.domain.review.reviewRecommend.entity.ReviewRecommend
 import com.back.global.jpa.entity.BaseEntity
 import jakarta.persistence.*
-import lombok.Getter
-import lombok.NoArgsConstructor
-import lombok.Setter
 
 @Entity
 class Review //    @Version
@@ -15,6 +12,7 @@ class Review //    @Version
     (
     var content: String,
     var rate: Int,
+    var spoiler: Boolean,
     @field:ManyToOne(fetch = FetchType.LAZY)
     var member: Member,
     @field:ManyToOne(fetch = FetchType.LAZY)

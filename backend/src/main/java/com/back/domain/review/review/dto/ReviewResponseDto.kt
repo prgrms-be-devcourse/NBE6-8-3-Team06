@@ -11,6 +11,7 @@ data class ReviewResponseDto(
     val memberId: Int,
     val likeCount: Int,
     val dislikeCount: Int,
+    val spoiler: Boolean,
     val isRecommended: Boolean?,
     val createdDate: LocalDateTime,
     val modifiedDate: LocalDateTime

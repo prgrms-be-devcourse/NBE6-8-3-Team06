@@ -35,16 +35,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
-
-    // lombok - for Java annotation processing
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-    kapt("org.projectlombok:lombok")
 
     // Kotlin & Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -59,6 +53,9 @@ dependencies {
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.0")
     kapt("io.github.openfeign.querydsl:querydsl-apt:7.0:jpa")
 
+    // MySQL
+    runtimeOnly("com.mysql:mysql-connector-j")
+
     // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
@@ -68,6 +65,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("io.mockk:mockk:1.13.8")
 }
 
 // kapt 설정 추가

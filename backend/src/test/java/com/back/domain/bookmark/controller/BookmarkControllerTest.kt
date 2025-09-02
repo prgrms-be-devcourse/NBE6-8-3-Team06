@@ -377,18 +377,18 @@ class BookmarkControllerTest(
             )
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.endReadDate").isEmpty())
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.id").value(bookmark.book.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.isbn13").value(bookmark.book.getIsbn13()))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.title").value(bookmark.book.getTitle()))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.imageUrl").value(bookmark.book.getImageUrl()))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.publisher").value(bookmark.book.getPublisher()))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.totalPage").value(bookmark.book.getTotalPage()))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.avgRate").value(bookmark.book.getAvgRate()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.isbn13").value(bookmark.book.isbn13))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.title").value(bookmark.book.title))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.imageUrl").value(bookmark.book.imageUrl))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.publisher").value(bookmark.book.publisher))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.totalPage").value(bookmark.book.totalPage))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.book.avgRate").value(bookmark.book.avgRate))
             .andExpect(
-                MockMvcResultMatchers.jsonPath("$.data.book.category").value(bookmark.book.getCategory().getName())
+                MockMvcResultMatchers.jsonPath("$.data.book.category").value(bookmark.book.category.name)
             ) //                .andExpect(jsonPath("$.data.book.authors").value(bookmark.book().authors()))
             .andExpect(
                 MockMvcResultMatchers.jsonPath("$.data.book.publishDate")
-                    .value(Matchers.startsWith(bookmark.book.getPublishedDate().toString().substring(0, 16)))
+                    .value(Matchers.startsWith(bookmark.book.publishedDate.toString().substring(0, 16)))
             )
     }
 

@@ -5,7 +5,6 @@ import com.back.domain.review.review.service.ReviewService
 import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
 import com.back.global.rq.Rq
 import com.back.global.rsData.RsData
-import lombok.RequiredArgsConstructor
 import org.springframework.web.bind.annotation.*
 
 @RestController
