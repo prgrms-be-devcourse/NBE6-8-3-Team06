@@ -44,6 +44,8 @@ export type BookmarkReviewDetail = {
     content: string;
     rate: number;
     date: string;
+    reportState: string;
+    adminMessage: string;
 };
 
 export type BookmarkNoteDetail = {

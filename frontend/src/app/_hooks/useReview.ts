@@ -116,7 +116,7 @@ export const useReview = (initBookId:number) =>{
   }
 }
 
-export const ReviewReport = () => {
+export const useReviewReport = () => {
   
   const createReviewReport = async(reviewId:number) => {
     const res = await apiFetch<ApiResponse>(`/reviews/${reviewId}`, {
@@ -155,5 +155,10 @@ export const ReviewReport = () => {
       }
     })
   }
-
+  return {
+    createReviewReport,
+    admSearchReviewReport,
+    admGetReviewReport,
+    admProcessReport
+  }
 }

@@ -86,7 +86,7 @@ export function Header({ children }: { children: React.ReactNode }) {
                 )}
 
                 {
-                  isLoggedIn && user?.name == "admin" && (
+                  (isLoggedIn && user?.name == "admin") && (
                     <Button
                       variant={currentPage === "/adm/report" ? "default" : "ghost"}
                       onClick={() => onNavigate("/adm/report")}
