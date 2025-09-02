@@ -119,8 +119,8 @@ internal class BookControllerTest {
         )
 
         // 리뷰 생성
-        review1 = reviewRepository.save(Review("정말 좋은 책입니다!", 5, testMember, book1))
-        review2 = reviewRepository.save(Review("보통이네요", 3, testMember, book1))
+        review1 = reviewRepository.save(Review("정말 좋은 책입니다!", 5, false, testMember, book1))
+        review2 = reviewRepository.save(Review("보통이네요", 3, false, testMember, book1))
 
         // 영속성 컨텍스트 플러시 및 클리어
         entityManager.run {
@@ -585,7 +585,7 @@ internal class BookControllerTest {
     fun getBookById_ReviewSortByCreatedDate_Success() {
         // 추가 리뷰 생성 (시간 차이를 두기 위해)
         Thread.sleep(1000)
-        val newerReview = reviewRepository.save(Review("최신 리뷰입니다", 4, testMember, book1))
+        val newerReview = reviewRepository.save(Review("최신 리뷰입니다", 4, false, testMember, book1))
 
         entityManager.run {
             flush()

@@ -14,6 +14,7 @@ import com.back.domain.book.wrote.repository.WroteRepository
 import com.back.domain.bookmarks.repository.BookmarkRepository
 import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
+import com.back.domain.review.review.service.ReviewDtoService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -22,13 +23,14 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.mockito.Mock
 import org.mockito.InjectMocks
-import org.mockito.ArgumentMatchers
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import org.mockito.stubbing.Answer
 import org.mockito.Mockito.lenient
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import java.time.LocalDateTime
 
 @ExtendWith(MockitoExtension::class)
@@ -57,6 +59,9 @@ internal class BookServiceTest {
 
     @Mock
     private lateinit var reviewRecommendService: ReviewRecommendService
+
+    @Mock
+    private lateinit var reviewDtoService: ReviewDtoService
 
     @InjectMocks
     private lateinit var bookService: BookService
@@ -89,7 +94,7 @@ internal class BookServiceTest {
 
         // API 클라이언트 호출되지 않았는지 확인
         Mockito.verify(aladinApiClient, Mockito.never())
-            .searchBooks(ArgumentMatchers.anyString(), ArgumentMatchers.any())
+            .searchBooks(any(), any())
     }
 
     @Test
@@ -107,15 +112,18 @@ internal class BookServiceTest {
             .thenReturn(Category("소설"))
         Mockito.`when`(authorRepository.findByName("J.K. 롤링"))
             .thenReturn(null)
-        Mockito.`when`(authorRepository.save<Author?>(ArgumentMatchers.any()))
+        Mockito.`when`(authorRepository.save<Author?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        Mockito.`when`(bookRepository.findByIsbn13(ArgumentMatchers.anyString()))
+        Mockito.`when`(bookRepository.findByIsbn13(any()))
             .thenReturn(null)
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -123,9 +131,9 @@ internal class BookServiceTest {
 
         // Then
         Mockito.verify(aladinApiClient).searchBooks(query, 10)
-        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(ArgumentMatchers.any())
-        Mockito.verify(authorRepository, Mockito.atLeastOnce()).save<Author?>(ArgumentMatchers.any())
-        Mockito.verify(wroteRepository, Mockito.atLeastOnce()).save<Wrote?>(ArgumentMatchers.any())
+        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(any())
+        Mockito.verify(authorRepository, Mockito.atLeastOnce()).save<Author?>(any())
+        Mockito.verify(wroteRepository, Mockito.atLeastOnce()).save<Wrote?>(any())
         Assertions.assertThat<BookSearchDto?>(result).hasSize(1)
     }
 
@@ -147,7 +155,7 @@ internal class BookServiceTest {
         Assertions.assertThat<String>(result?.authors).contains("테스트 작가")
 
         // API 클라이언트 호출되지 않았는지 확인
-        Mockito.verify(aladinApiClient, Mockito.never()).getBookByIsbn(ArgumentMatchers.anyString())
+        Mockito.verify(aladinApiClient, Mockito.never()).getBookByIsbn(any())
     }
 
     @Test
@@ -165,13 +173,16 @@ internal class BookServiceTest {
             .thenReturn(Category("소설"))
         Mockito.`when`(authorRepository.findByName("J.K. 롤링"))
             .thenReturn(null)
-        Mockito.`when`(authorRepository.save<Author?>(ArgumentMatchers.any()))
+        Mockito.`when`(authorRepository.save<Author?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -179,10 +190,10 @@ internal class BookServiceTest {
 
         // Then
         Mockito.verify(aladinApiClient).getBookByIsbn(isbn)
-        Mockito.verify(bookRepository).save<Book?>(ArgumentMatchers.any())
+        Mockito.verify(bookRepository).save<Book?>(any())
         Mockito.verify(authorRepository)
-            .save<Author?>(ArgumentMatchers.any())
-        Mockito.verify(wroteRepository).save<Wrote?>(ArgumentMatchers.any())
+            .save<Author?>(any())
+        Mockito.verify(wroteRepository).save<Wrote?>(any())
         Assertions.assertThat<BookSearchDto?>(result).isNotNull()
     }
 
@@ -225,13 +236,16 @@ internal class BookServiceTest {
             .thenReturn(Category("소설"))
         Mockito.`when`(authorRepository.findByName("테스트 작가"))
             .thenReturn(testAuthor)
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
         Mockito.`when`(bookRepository.findByIsbn13("9788966261024"))
             .thenReturn(null)
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -240,7 +254,7 @@ internal class BookServiceTest {
         // Then
         Mockito.verify(aladinApiClient).getBookDetails("9788966261024")
         Mockito.verify<BookRepository?>(bookRepository, Mockito.atLeastOnce())
-            .save<Book>(ArgumentMatchers.argThat<Book> { book -> book.totalPage == 300 })
+            .save<Book>(argThat<Book> { book -> book.totalPage == 300 })
     }
 
     @Test
@@ -258,13 +272,16 @@ internal class BookServiceTest {
             .thenReturn(Category("소설"))
         Mockito.`when`(authorRepository.findByName("J.K. 롤링"))
             .thenReturn(testAuthor) // 이미 존재하는 작가
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        Mockito.`when`(bookRepository.findByIsbn13(ArgumentMatchers.anyString()))
+        Mockito.`when`(bookRepository.findByIsbn13(any()))
             .thenReturn(null)
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -272,8 +289,8 @@ internal class BookServiceTest {
 
         // Then
         Mockito.verify(authorRepository, Mockito.never())
-            .save<Author?>(ArgumentMatchers.any()) // 새로운 작가 생성 안 함
-        Mockito.verify(wroteRepository, Mockito.atLeastOnce()).save<Wrote?>(ArgumentMatchers.any()) // 관계는 생성
+            .save<Author?>(any()) // 새로운 작가 생성 안 함
+        Mockito.verify(wroteRepository, Mockito.atLeastOnce()).save<Wrote?>(any()) // 관계는 생성
     }
 
     @Test
@@ -292,9 +309,9 @@ internal class BookServiceTest {
         // Then
         Assertions.assertThat<BookSearchDto?>(result).isEmpty()
         Mockito.verify(authorRepository, Mockito.never())
-            .save<Author?>(ArgumentMatchers.any())
+            .save<Author?>(any())
         Mockito.verify(wroteRepository, Mockito.never())
-            .save<Wrote?>(ArgumentMatchers.any())
+            .save<Wrote?>(any())
     }
 
     @Test
@@ -322,13 +339,16 @@ internal class BookServiceTest {
             .thenReturn(Category("소설"))
         Mockito.`when`(authorRepository.findByName("테스트 작가"))
             .thenReturn(testAuthor)
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        Mockito.`when`(bookRepository.findByIsbn13(ArgumentMatchers.anyString()))
+        Mockito.`when`(bookRepository.findByIsbn13(any()))
             .thenReturn(null)
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -336,7 +356,7 @@ internal class BookServiceTest {
 
         // Then
         Mockito.verify(categoryRepository, Mockito.atLeastOnce()).findByName("소설")
-        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(ArgumentMatchers.any())
+        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(any())
     }
 
     @Test
@@ -362,17 +382,20 @@ internal class BookServiceTest {
             .thenReturn(mutableListOf<AladinBookDto>(apiBook))
         Mockito.`when`(categoryRepository.findByName("새로운분야"))
             .thenReturn(null)
-        Mockito.`when`(categoryRepository.save<Category?>(ArgumentMatchers.any()))
+        Mockito.`when`(categoryRepository.save<Category?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
         Mockito.`when`(authorRepository.findByName("테스트 작가"))
             .thenReturn(testAuthor)
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        Mockito.`when`(bookRepository.findByIsbn13(ArgumentMatchers.anyString()))
+        Mockito.`when`(bookRepository.findByIsbn13(any()))
             .thenReturn(null)
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -381,8 +404,8 @@ internal class BookServiceTest {
         // Then
         Mockito.verify(categoryRepository, Mockito.atLeastOnce()).findByName("새로운분야")
         Mockito.verify(categoryRepository, Mockito.atLeastOnce())
-            .save<Category>(ArgumentMatchers.argThat<Category> { category -> "새로운분야" == category.name })
-        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(ArgumentMatchers.any())
+            .save<Category>(argThat<Category> { category -> "새로운분야" == category.name })
+        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(any())
     }
 
     @Test
@@ -410,13 +433,16 @@ internal class BookServiceTest {
             .thenReturn(Category("외국도서"))
         Mockito.`when`(authorRepository.findByName("테스트 작가"))
             .thenReturn(testAuthor)
-        // 모든 케이스에서 false 반환하도록 설정
-        Mockito.doReturn(false).`when`(wroteRepository).existsByAuthorAndBook(ArgumentMatchers.any(Author::class.java), ArgumentMatchers.any(Book::class.java))
-        Mockito.`when`(wroteRepository.save<Wrote?>(ArgumentMatchers.any()))
+        // wroteRepository.existsByAuthorAndBook을 완전히 우회
+        Mockito.doAnswer { invocation ->
+            // 어떤 파라미터가 와도 항상 false 반환
+            false
+        }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
-        Mockito.`when`(bookRepository.findByIsbn13(ArgumentMatchers.anyString()))
+        Mockito.`when`(bookRepository.findByIsbn13(any()))
             .thenReturn(null)
-        Mockito.`when`(bookRepository.save<Book?>(ArgumentMatchers.any()))
+        Mockito.`when`(bookRepository.save<Book?>(any()))
             .thenAnswer(Answer { invocation: InvocationOnMock -> invocation.getArgument<Any?>(0) })
 
         // When
@@ -424,7 +450,7 @@ internal class BookServiceTest {
 
         // Then
         Mockito.verify(categoryRepository, Mockito.atLeastOnce()).findByName("외국도서")
-        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(ArgumentMatchers.any())
+        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(any())
     }
 
     // ===== Helper Methods =====
