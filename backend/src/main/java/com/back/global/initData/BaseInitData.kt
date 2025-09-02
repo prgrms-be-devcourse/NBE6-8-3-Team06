@@ -13,8 +13,8 @@ import com.back.domain.member.member.repository.MemberRepository
 import com.back.domain.member.member.service.MemberService
 import com.back.domain.note.repository.NoteRepository
 import com.back.domain.note.service.NoteService
-import com.back.domain.review.review.entity.Review
-import com.back.domain.review.review.repository.ReviewRepository
+import com.back.domain.review.review.dto.ReviewRequestDto
+import com.back.domain.review.review.service.ReviewService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
-import java.util.function.Supplier
 
 
 @Configuration
@@ -68,7 +67,7 @@ class BaseInitData(
         val book = bookRepository.findAll().get(0) // 첫 번째 책을 가져옴
         for (i in 1..memberCount-1) {
             val member = memberRepository.findByEmail("email" + i + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")
-            reviewService.addReview(book.id, member, ReviewRequestDto("리뷰 ㅋㅋ " + i, 5, i>90))
+            reviewService.addReview(book.id, member, ReviewRequestDto("리뷰 ㅋㅋ " + i, 5, i > 90))
         }
         run {
             val member = memberRepository.findByEmail("email" + 100 + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")
@@ -76,7 +75,8 @@ class BaseInitData(
                 "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Similique dolorum corrupti eaque adipisci dolore exercitationem voluptates, quo obcaecati sint earum aliquam fugit quisquam in sunt cupiditate excepturi error nulla eligendi!",
                 5,
                 true
-                ))
+            )
+            )
         }
 
         //        Category category = categoryRepository.save(new Category("Test Category"));
