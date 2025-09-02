@@ -53,6 +53,9 @@ dependencies {
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.0")
     kapt("io.github.openfeign.querydsl:querydsl-apt:7.0:jpa")
 
+    // MySQL
+    runtimeOnly("com.mysql:mysql-connector-j")
+
     // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
