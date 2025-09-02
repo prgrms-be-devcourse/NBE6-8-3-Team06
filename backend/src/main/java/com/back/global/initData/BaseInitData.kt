@@ -48,6 +48,7 @@ class BaseInitData(
     @Bean
     fun baseInitDataApplicationRunner(): ApplicationRunner {
         return ApplicationRunner { args: ApplicationArguments ->
+            self.initStandardCategories() // 표준 카테고리 초기화
             self.initBookData() // 책 데이터 초기화
             self.initReviewData() // 리뷰 테스트 시 주석 해제
             self.initNoteData() // Note 관련 데이터
@@ -189,6 +190,83 @@ class BaseInitData(
         noteService.write(id1, "제목2", "내용2", "2", member1)
         noteService.write(id2, "제목3", "내용3", "3", member2)
         noteService.write(id2, "제목4", "내용4", "4", member2)
+    }
+
+    @Transactional
+    fun initStandardCategories() {
+        if (categoryRepository.count() > 0) {
+            println("카테고리가 이미 존재합니다. 초기화하지 않습니다.")
+            return
+        }
+
+        val standardCategories = listOf(
+            "가정/요리/뷰티",
+            "건강/취미/레저",
+            "경영/경제",
+            "과학",
+            "대학교재/전문서적",
+            "만화",
+            "소설/시/희곡",
+            "수험서/자격증",
+            "어린이",
+            "여행",
+            "역사",
+            "예술/대중문화",
+            "외국어",
+            "유아",
+            "인문학",
+            "자기계발",
+            "잡지",
+            "전집/중고전집",
+            "종교/역학",
+            "좋은부모",
+            "중학교참고서",
+            "초등학교참고서",
+            "청소년_추천도서",
+            "컴퓨터/모바일",
+            "ELT/어학/사전", 
+            "가정/원예/인테리어", 
+            "가족/관계", 
+            "건강/스포츠", 
+            "건축/디자인", 
+            "게임/토이", 
+            "경제경영", 
+            "공예/취미/수집", 
+            "교육/자료", 
+            "기술공학", 
+            "기타", 
+            "기타 언어권 도서", 
+            "달력/다이어리/연감", 
+            "대만도서", 
+            "대학교재", 
+            "독일 도서", 
+            "문구/비도서", 
+            "법률", 
+            "수험서", 
+            "스페인 도서", 
+            "언어학", 
+            "에세이", 
+            "오디오북", 
+            "요리", 
+            "유머", 
+            "의학", 
+            "인문/사회", 
+            "일본 도서", 
+            "자연과학", 
+            "전기/자서전", 
+            "종교/명상/점술", 
+            "중국 도서", 
+            "청소년", 
+            "컴퓨터", 
+            "한국관련도서", 
+            "해외잡지"
+        )
+
+        standardCategories.forEach { categoryName ->
+            categoryRepository.save(Category(categoryName))
+        }
+
+        println("표준 카테고리 ${standardCategories.size}개가 생성되었습니다.")
     }
 
     fun initBookmarkData() {
