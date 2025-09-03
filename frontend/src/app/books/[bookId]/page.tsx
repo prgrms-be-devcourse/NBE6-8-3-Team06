@@ -6,15 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, BookOpen, Building, Calendar, Globe, Heart, Plus, Star, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ArrowLeft, BookOpen, Building, Calendar, Flag, Globe, Heart, MoreHorizontal, Plus, Star, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { BookDetailDto, fetchBookDetail, ReviewResponseDto, addToMyBooks, ReadState } from "@/types/book";
-import { useReview, useReviewRecommend } from "@/app/_hooks/useReview";
+import { useReview, useReviewRecommend, useReviewReport } from "@/app/_hooks/useReview";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/app/_hooks/auth-context";
 import { toast } from "sonner";
 import Spoiler from "@/components/Spoiler";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function page({params}:{params:Promise<{bookId:string}>}){
     const {bookId:bookIdStr} = use(params);
@@ -27,10 +32,15 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
     const router = useRouter();
     const reviewApi = useReview(bookId);
     const reviewRecommendApi = useReviewRecommend();
+    const reviewReportAPi = useReviewReport();
     const [tabState, setTabState] = useState("description");
     const [reviewPage, setReviewPage] = useState(0);
     const {theme} = useTheme();
     const { isLoggedIn } = useAuth();
+    const [selectedReview, setSelectedReview] = useState<ReviewResponseDto | null>(null);
+    const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+    const [reportDescription, setReportDescription] = useState('');
     
     const loadBookDetail = async () => {
       try {
@@ -134,6 +144,30 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
   const handleAddToMyBooks = () => {
     onAddToMyBooks(bookDetail.id);
   };
+
+  const handleReportClick = (review: ReviewResponseDto) => {
+    setSelectedReview(review);
+    setIsReportDialogOpen(true);
+  };
+
+  const handleReportSubmit = async () => {
+    const review = selectedReview
+    if (review == null){
+      setIsReportDialogOpen(false)
+      return
+    }
+    await reviewReportAPi.createReviewReport(
+      review.id,
+      {
+        reason:reportReason,
+        description:reportDescription
+      }
+    )
+    setIsReportDialogOpen(false)
+    setSelectedReview(null);
+    setReportReason("")
+    setReportDescription("")
+  }
 
   const handleRecommend = async(review:ReviewResponseDto, recommend:boolean)=>{
     if (!isLoggedIn){
@@ -339,6 +373,19 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
                                 <ThumbsDown fill={review.isRecommended === false ? theme==="dark"?"#fff":"#000" : "none"} strokeWidth={review.isRecommended===false?1:2} className="h-4 w-4 mr-1" />
                                 싫어요 {reviewRecommendApi.formatLikes(review.dislikeCount)}
                               </Button>
+                              <DropdownMenu modal={false}>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleReportClick(review)}>
+                                  <Flag className="h-4 w-4 mr-2" />
+                                  신고하기
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             </div>
                           </div>
                       </div>
@@ -425,6 +472,57 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
           </Tabs>
         </div>
       </div>
+      <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>리뷰 신고</DialogTitle>
+            <DialogDescription>
+              부적절한 리뷰를 신고해주세요. 신고 내용은 관리자가 검토 후 조치합니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="report-reason">신고 사유</Label>
+              <Select value={reportReason} onValueChange={setReportReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="신고 사유를 선택해주세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="부적절한 언어">부적절한 언어</SelectItem>
+                  <SelectItem value="스포일러">스포일러</SelectItem>
+                  <SelectItem value="허위 정보">허위 정보</SelectItem>
+                  <SelectItem value="건설적이지 않은 비판">건설적이지 않은 비판</SelectItem>
+                  <SelectItem value="광고 및 홍보">광고 및 홍보</SelectItem>
+                  <SelectItem value="개인정보 노출">개인정보 노출</SelectItem>
+                  <SelectItem value="기타">기타</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="report-description">신고 상세 내용</Label>
+              <Textarea
+                id="report-description"
+                placeholder="신고 사유에 대해 구체적으로 설명해주세요."
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsReportDialogOpen(false)}>
+                취소
+              </Button>
+              <Button 
+                onClick={handleReportSubmit}
+                disabled={!reportReason || !reportDescription.trim()}
+                variant="destructive"
+              >
+                신고하기
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import com.back.domain.book.category.repository.CategoryRepository
 import com.back.domain.bookmarks.entity.Bookmark
 import com.back.domain.bookmarks.repository.BookmarkRepository
 import com.back.domain.bookmarks.service.BookmarkService
+import com.back.domain.member.member.constant.MemberRole
 import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.repository.MemberRepository
 import com.back.domain.member.member.service.MemberService
@@ -65,6 +66,10 @@ class BaseInitData(
         for (i in 1..memberCount) {
             memberService.join("testUser" + i, "email" + i + "@a.a", passwordEncoder.encode("password" + i))
         }
+
+        val adminAccount = Member("admin", "admin@a.a",passwordEncoder.encode("adminadmin"), MemberRole.ADMIN)
+        memberRepository.save(adminAccount)
+
         val book = bookRepository.findAll().get(0) // 첫 번째 책을 가져옴
         for (i in 1..memberCount-1) {
             val member = memberRepository.findByEmail("email" + i + "@a.a")?:throw NoSuchElementException("멤버를 찾을 수 없습니다: ")

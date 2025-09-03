@@ -49,7 +49,7 @@ class ReviewService(
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val review = reviewRepository.findByBookAndMember(book, member)?: throw NoSuchElementException("review not found")
-        reviewRepository.delete(review)
+        review.deleted = true
         bookService.updateBookAvgRate(book)
     }
 
@@ -67,6 +67,7 @@ class ReviewService(
         return reviewRepository.count()
     }
 
+    @Transactional(readOnly = true)
     fun findByBookAndMember(bookId: Int, member: Member): Review? {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
@@ -74,17 +75,31 @@ class ReviewService(
     }
 
     fun findById(reviewId: Int): Review? {
-        return reviewRepository.findById(reviewId).orElse(null)
+        return reviewRepository.findById(reviewId).orElse(null)?.let {
+            if (it.deleted) null else it
+        }
     }
 
     fun findByBookOrderByCreateDateDesc(book: Book, pageable: Pageable): Page<Review> {
         return reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
     }
 
+    @Transactional(readOnly = true)
     fun getPageReviewResponseDto(bookId: Int, pageable: Pageable, member: Member): PageResponseDto<ReviewResponseDto> {
         val book = bookRepository.findById(bookId)
             .orElseThrow(Supplier { NoSuchElementException("Book not found") })
         val reviewPage: Page<Review> = reviewRepository.findByBookOrderByCreateDateDesc(book, pageable)
         return reviewDtoService.reviewsToReviewResponseDtos(reviewPage, member)
+    }
+
+    fun hardDelete(days:Int){
+        reviewRepository.hardDeleteByElapsedDays(days = days)
+    }
+
+    @Transactional
+    fun softDelete(reviewId: Int) {
+        val review = reviewRepository.findById(reviewId).orElseThrow { throw NoSuchElementException("Review not found") }
+        review.deleted = true
+        bookService.updateBookAvgRate(review.book)
     }
 }

@@ -52,11 +52,8 @@ class ReviewRecommendControllerTest(
 ) {
 
 
-    fun makeAccessTokens(count: Int): MutableList<String> {
-        return memberRepository.findAll().stream()
-            .limit(count.toLong())
-            .map { member: Member -> memberService!!.geneAccessToken(member) }
-            .toList()
+    fun makeAccessTokens(count: Int): List<String> {
+        return memberRepository.findAll().take(count).map {member -> memberService.geneAccessToken(member)}
     }
 
     @Throws(Exception::class)

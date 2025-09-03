@@ -12,20 +12,10 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.util.*
 
-interface ReviewRepository : JpaRepository<Review, Int> {
-    fun findFirstByOrderByIdDesc(): Review?
+interface ReviewRepository : JpaRepository<Review, Int>, ReviewRepositoryCustom {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     fun findWithLockById(id: Int): Review?
-
-    fun findByBookAndMember(book: Book, member: Member): Review?
-
-    @Query("SELECT AVG(rate) FROM Review WHERE member= :member")
-    fun findAverageRatingByMember(@Param("member") member: Member): Double?
-
-    fun findAllByMember(member: Member): MutableList<Review>
-
-    fun findByBookOrderByCreateDateDesc(book: Book, pageable: Pageable): Page<Review>
 
     fun findByBook(book: Book, pageable: Pageable): Page<Review>
 }

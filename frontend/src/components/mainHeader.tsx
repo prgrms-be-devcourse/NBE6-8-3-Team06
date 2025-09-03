@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../app/_hooks/auth-context";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Home, User, LogOut, Library, Sun, Moon } from "lucide-react";
+import { BookOpen, Home, User, LogOut, Library, Sun, Moon, Shield } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
@@ -39,7 +39,7 @@ function ThemeButton(){
 export function Header({ children }: { children: React.ReactNode }) {
   const currentPage = usePathname();
   const router = useRouter();
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, user } = useAuth();
   const onNavigate = (url: string) => {
     router.push(url);
   };
@@ -84,6 +84,20 @@ export function Header({ children }: { children: React.ReactNode }) {
                     <span>내 책</span>
                   </Button>
                 )}
+
+                {
+                  (isLoggedIn && user?.name == "admin") && (
+                    <Button
+                      variant={currentPage === "/adm/report" ? "default" : "ghost"}
+                      onClick={() => onNavigate("/adm/report")}
+                      className="flex items-center space-x-2"
+                      >
+                        <Shield className="h-4 w-4"></Shield>
+                        <span>신고 관리</span>
+                      
+                    </Button>
+                  )
+                }
               </div>
             </div>
 

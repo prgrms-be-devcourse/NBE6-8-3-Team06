@@ -1,5 +1,6 @@
 package com.back.domain.review.review.dto
 
+import com.back.domain.review.reviewReport.entity.ReviewReportState
 import java.time.LocalDateTime
 
 
@@ -13,6 +14,8 @@ data class ReviewResponseDto(
     val dislikeCount: Int,
     val spoiler: Boolean,
     val isRecommended: Boolean?,
+    val reportState: ReviewReportState,
+    val adminMessage: String?,
     val createdDate: LocalDateTime,
     val modifiedDate: LocalDateTime
 ) {

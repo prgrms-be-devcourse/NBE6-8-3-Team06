@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getBookmark } from "@/types/bookmarkAPI";
 import { BookmarkDetail } from "@/types/bookmarkData";
-import { ArrowLeft, Save, Star, Trash2, UndoIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Ban, CheckCircle, Edit, Save, Shield, Star, Trash2, UndoIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useCallback, useEffect, useState } from "react";
 
@@ -172,6 +172,44 @@ export default withLogin(function page({params}:{params:Promise<{id:string}>}){
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+                {/* 어드민 메시지 표시 */}
+                {review?.adminMessage && (
+                <div className={`w-full rounded-lg border p-4 ${
+                  review?.reportState === 'approved' ? 'border-green-200 bg-green-50' : 
+                  review?.reportState === 'report_rejected' ? 'border-blue-200 bg-blue-50' :
+                  review?.reportState === 'modification_requested' ? 'border-orange-200 bg-orange-50' : 
+                  'border-red-200 bg-red-50'
+                }`}>
+                  <div className="flex items-start gap-3">
+                    {review?.reportState === 'approved' ? (
+                      <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                    ) : review?.reportState === 'report_rejected' ? (
+                      <Ban className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                    ) : review?.reportState === 'modification_requested' ? (
+                      <Edit className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Shield className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">관리자 메시지</span>
+                        {/* <span className="text-xs text-muted-foreground">
+                          {new Date(adminMessage.timestamp).toLocaleDateString()}
+                        </span> */}
+                      </div>
+                      <div className={`text-sm leading-relaxed ${
+                        review?.reportState === 'approved' ? 'text-green-800' : 
+                        review?.reportState === 'report_rejected' ? 'text-blue-800' :
+                        review?.reportState === 'modification_requested' ? 'text-orange-800' : 
+                        'text-red-800'
+                      }`}>
+                        {review?.adminMessage}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* 별점 */}
               <div className="space-y-3">
                 <Label>별점</Label>
