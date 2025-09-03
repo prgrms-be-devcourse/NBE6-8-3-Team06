@@ -1,6 +1,6 @@
 "use client"
 
-import { Ban, Check, Clock, X } from "lucide-react";
+import { Ban, Check, Clock, Edit, X } from "lucide-react";
 import { Badge } from "./ui/badge";
 
 export const getStatusBadge = (status: string) => {
@@ -13,6 +13,8 @@ export const getStatusBadge = (status: string) => {
         return <Badge variant="destructive"><X className="w-3 h-3 mr-1" />삭제됨</Badge>;
       case 'REJECT':
         return <Badge variant="outline"><Ban className="w-3 h-3 mr-1" />신고 기각</Badge>;
+      case 'EDIT_REQUIRED':
+        return <Badge variant="secondary" className="bg-orange-100 text-orange-800"><Edit className="w-3 h-3 mr-1"></Edit>수정 요청</Badge>
       default:
         return null;
     }

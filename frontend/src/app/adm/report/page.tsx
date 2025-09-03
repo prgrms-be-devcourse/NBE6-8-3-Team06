@@ -21,6 +21,8 @@ import { useEffect, useState } from "react";
 export default function AdminReportsPage() {
   const [notProceedReports, setNotProceedReports] = useState<ReviewReportResponseDto[]>([]);
   const [proceedReports, setProceedReports] = useState<ReviewReportResponseDto[]>([]);
+  const [notProceedPage, setNotProceedPage]= useState<PageResponseDto<ReviewReportResponseDto> | null>(null);
+  const [proceedPage, setProceedPage]= useState<PageResponseDto<ReviewReportResponseDto> | null>(null);
   const [activeTab, setActiveTab] = useState('pending');
   const router = useRouter()
   const reviewReport = useReviewReport()
@@ -32,8 +34,10 @@ export default function AdminReportsPage() {
     }
     if (processed){
       setProceedReports(res.data)
+      setProceedPage(res)
     }else{
       setNotProceedReports(res.data)
+      setNotProceedPage(res)
     }
   }
 
@@ -64,6 +68,14 @@ export default function AdminReportsPage() {
     setActiveTab(value)
   }
 
+  if (notProceedPage == null){
+    return null
+  }
+
+  if (proceedPage == null){
+    return null
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex items-center space-x-3 mb-8">
@@ -85,11 +97,11 @@ export default function AdminReportsPage() {
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="pending" className="flex items-center space-x-2">
             <Clock className="h-4 w-4" />
-            <span>처리 대기 ({notProceedReports.length})</span>
+            <span>처리 대기 ({notProceedPage.totalElements})</span>
           </TabsTrigger>
           <TabsTrigger value="processed" className="flex items-center space-x-2">
             <Check className="h-4 w-4" />
-            <span>처리 완료 ({proceedReports.length})</span>
+            <span>처리 완료 ({proceedPage.totalElements})</span>
           </TabsTrigger>
         </TabsList>
 
@@ -134,6 +146,69 @@ export default function AdminReportsPage() {
                   </CardContent>
                 </Card>
               ))}
+              {/* 리뷰 페이징 */}
+              {notProceedPage.totalPages > 1 && (
+                <div className="mt-8 flex justify-center items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(0, false)}
+                    disabled={notProceedPage.pageNumber === 0}
+                  >
+                    처음
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(notProceedPage.pageNumber-1, false)}
+                    disabled={notProceedPage.pageNumber === 0}
+                  >
+                    이전
+                  </Button>
+                  
+                  {/* 페이지 번호들 */}
+                  {Array.from({ length: Math.min(5, notProceedPage.totalPages) }, (_, i) => {
+                    const startPage = Math.max(0, Math.min(notProceedPage.pageNumber - 2, notProceedPage.totalPages - 5));
+                    const pageNum = startPage + i;
+                    if (pageNum >= notProceedPage.totalPages) return null;
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={pageNum === notProceedPage.pageNumber ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => fetchReport(pageNum, false)}
+                      >
+                        {pageNum + 1}
+                      </Button>
+                    );
+                  })}
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(notProceedPage.pageNumber+1, false)}
+                    disabled={notProceedPage.isLast}
+                  >
+                    다음
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(notProceedPage.totalPages - 1, false)}
+                    disabled={notProceedPage.isLast}
+                  >
+                    마지막
+                  </Button>
+                </div>
+              )}
+
+              {/* 리뷰 페이징 정보 */}
+              {notProceedPage.totalElements > 0 && (
+                <div className="mt-4 text-center text-sm text-muted-foreground">
+                  전체 {notProceedPage.totalElements}개의 리뷰 중 {notProceedPage.pageNumber + 1}/{notProceedPage.totalPages} 페이지
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -179,9 +254,72 @@ export default function AdminReportsPage() {
                   </CardContent>
                 </Card>
               ))}
+              {proceedPage.totalPages > 1 && (
+                <div className="mt-8 flex justify-center items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(0, true)}
+                    disabled={proceedPage.pageNumber === 0}
+                  >
+                    처음
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(proceedPage.pageNumber-1, true)}
+                    disabled={proceedPage.pageNumber === 0}
+                  >
+                    이전
+                  </Button>
+                  
+                  {/* 페이지 번호들 */}
+                  {Array.from({ length: Math.min(5, proceedPage.totalPages) }, (_, i) => {
+                    const startPage = Math.max(0, Math.min(proceedPage.pageNumber - 2, proceedPage.totalPages - 5));
+                    const pageNum = startPage + i;
+                    if (pageNum >= proceedPage.totalPages) return null;
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={pageNum === proceedPage.pageNumber ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => fetchReport(pageNum, true)}
+                      >
+                        {pageNum + 1}
+                      </Button>
+                    );
+                  })}
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(proceedPage.pageNumber+1, true)}
+                    disabled={proceedPage.isLast}
+                  >
+                    다음
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchReport(proceedPage.totalPages - 1, true)}
+                    disabled={proceedPage.isLast}
+                  >
+                    마지막
+                  </Button>
+                </div>
+              )}
+
+              {/* 리뷰 페이징 정보 */}
+              {proceedPage.totalElements > 0 && (
+                <div className="mt-4 text-center text-sm text-muted-foreground">
+                  전체 {proceedPage.totalElements}개의 리뷰 중 {proceedPage.pageNumber + 1}/{proceedPage.totalPages} 페이지
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
+        
       </Tabs>
     </div>
   );
