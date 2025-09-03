@@ -33,7 +33,8 @@ spring:
             scope: profile_nickname
             client-name: Kakao
             authorization-grant-type: authorization_code
-            redirect-uri: 'http://localhost:8080/login/oauth2/code/kakao'
+#            redirect-uri: 'http://localhost:8080/login/oauth2/code/kakao'
+            redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
             client-authentication-method: client_secret_post
           google:
             client-id: ${SPRING__SECURITY__OAUTH2__CLIENT__REGISTRATION__GOOGLE__CLIENT_ID}
@@ -41,7 +42,8 @@ spring:
             scope: profile,email
             client-name: Google
             authorization-grant-type: authorization_code
-            redirect-uri: 'http://localhost:8080/login/oauth2/code/google'
+#            redirect-uri: 'http://localhost:8080/login/oauth2/code/google'
+            redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
