@@ -46,6 +46,7 @@ export type BookmarkReviewDetail = {
     date: string;
     reportState: string;
     adminMessage: string;
+    spoiler: boolean;
 };
 
 export type BookmarkNoteDetail = {

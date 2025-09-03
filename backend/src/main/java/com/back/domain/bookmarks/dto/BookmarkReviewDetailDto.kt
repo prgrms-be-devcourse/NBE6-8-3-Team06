@@ -10,7 +10,8 @@ data class BookmarkReviewDetailDto(
     val rate: Double,
     val date: LocalDateTime,
     val reportState: ReviewReportState,
-    val adminMessage: String?
+    val adminMessage: String?,
+    val spoiler: Boolean,
 ) {
     constructor(review: Review) : this(
         id = review.id,
@@ -19,5 +20,6 @@ data class BookmarkReviewDetailDto(
         date = review.modifyDate,
         reportState = review.reportState,
         adminMessage = review.adminMessage,
+        spoiler = review.spoiler,
     )
 }
