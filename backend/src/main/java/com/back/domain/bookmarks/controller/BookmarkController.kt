@@ -84,9 +84,6 @@ class BookmarkController(
     ): RsData<PageResponseDto<BookmarkDto>> {
         val member = rq.getAuthenticatedActor()
         val bookmarkDtoPage = bookmarkService.toPage(member, pageable, category, read_state, keyword)
-        if (bookmarkDtoPage.isEmpty()) {
-            return RsData("404-1", "데이터가 없습니다.", null)
-        }
         return RsData(
             "200-1",
             "${pageable.pageNumber}번 페이지 조회 성공",
