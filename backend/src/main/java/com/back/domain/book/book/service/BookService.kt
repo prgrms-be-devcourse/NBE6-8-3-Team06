@@ -649,7 +649,7 @@ class BookService(
         val reviews = book.reviews
         if (reviews.isEmpty()) return 0.0f
 
-        return reviews.map { it.rate }.average().toFloat()
+        return reviews.filter{ !it.deleted}.map { it.rate }.average().toFloat()
     }
 
     /**

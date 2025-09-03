@@ -40,7 +40,7 @@ export default withLogin(function page({params}:{params:Promise<{id:string}>}){
     setContent(bookmarkData.review?.content || '');
     setBookId(bookmarkData.book?.id || 0);
     reviewApi.setBookId(bookmarkData.book?.id || 0);
-    setSpoiler(bookmarkData.review.spoiler)
+    setSpoiler(bookmarkData.review.spoiler||false)
   }
   
   useEffect(()=>{
