@@ -29,21 +29,31 @@ class AladinApiClient(
     // API 엔드포인트 enum
     enum class ApiEndpoint(val endpoint: String) {
         ITEM_SEARCH("ItemSearch.aspx"),
-        ITEM_LOOKUP("ItemLookUp.aspx")
+        ITEM_LOOKUP("ItemLookUp.aspx"),
+        ITEM_LIST("ItemList.aspx")
     }
 
-    // 검색 대상 enum (eBook 제거)
+    // 검색 대상 enum
     enum class SearchTarget(val target: String, val displayName: String) {
         BOOK("Book", "국내도서"),
         FOREIGN("Foreign", "외국도서")
     }
 
     /**
-     * 검색어로 책 검색
+     * 카테고리ID로 도서 검색
+     */
+    fun searchBooksByCategory(categoryId: Int, searchTarget: SearchTarget = SearchTarget.BOOK, maxResults: Int = 50): List<AladinBookDto> {
+        val url = buildCategoryListUrl(categoryId, searchTarget, maxResults)
+        return callApiAndParseBooks(url, "카테고리검색-${searchTarget.displayName}")
+    }
+
+
+    /**
+     * 검색어로 책 검색 (기존 메서드)
      */
     fun searchBooks(query: String?, limit: Int): List<AladinBookDto> {
         val allBooks = mutableListOf<AladinBookDto>()
-        val limitPerCategory = max(1, limit / 2) // 2개 카테고리로 변경
+        val limitPerCategory = max(1, limit / 2)
 
         try {
             SearchTarget.entries.forEach { searchTarget ->
@@ -58,8 +68,9 @@ class AladinApiClient(
         return allBooks.take(limit)
     }
 
+
     /**
-     * ISBN으로 책 조회
+     * ISBN으로 책 조회 (기존 메서드)
      */
     fun getBookByIsbn(isbn: String?): AladinBookDto? {
         val url = buildIsbnLookupUrl(isbn)
@@ -68,7 +79,7 @@ class AladinApiClient(
     }
 
     /**
-     * 책 상세 정보 조회 (페이지 수, 저자 정보 등)
+     * 책 상세 정보 조회 (기존 메서드)
      */
     fun getBookDetails(isbn: String?): AladinBookDto? {
         return try {
@@ -87,7 +98,7 @@ class AladinApiClient(
     }
 
     /**
-     * 검색 API URL 생성
+     * 검색 API URL 생성 (기존 메서드)
      */
     private fun buildSearchUrl(query: String?, maxResults: Int, searchTarget: SearchTarget): String {
         return "$aladinBaseUrl/${ApiEndpoint.ITEM_SEARCH.endpoint}" +
@@ -102,8 +113,29 @@ class AladinApiClient(
                 "&OptResult=authors"
     }
 
+
     /**
-     * ISBN 조회 API URL 생성
+     * 카테고리 리스트 API URL 생성
+     */
+    private fun buildCategoryListUrl(
+        categoryId: Int,
+        searchTarget: SearchTarget,
+        maxResults: Int
+    ): String {
+        return "$aladinBaseUrl/${ApiEndpoint.ITEM_LIST.endpoint}" +
+                "?ttbkey=$aladinApiKey" +
+                "&QueryType=ItemNewAll" +
+                "&MaxResults=$maxResults" +
+                "&start=1" +
+                "&SearchTarget=${searchTarget.target}" +
+                "&CategoryId=$categoryId" +
+                "&output=js" +
+                "&Version=20131101" +
+                "&OptResult=authors"
+    }
+
+    /**
+     * ISBN 조회 API URL 생성 (기존 메서드)
      */
     private fun buildIsbnLookupUrl(isbn: String?): String {
         return "$aladinBaseUrl/${ApiEndpoint.ITEM_LOOKUP.endpoint}" +
@@ -116,7 +148,7 @@ class AladinApiClient(
     }
 
     /**
-     * API 호출 및 파싱 공통 메서드
+     * API 호출 및 파싱 공통 메서드 (기존 메서드)
      */
     private fun callApiAndParseBooks(url: String, searchType: String): List<AladinBookDto> {
         return try {
@@ -130,7 +162,7 @@ class AladinApiClient(
     }
 
     /**
-     * API 응답 파싱
+     * API 응답 파싱 (기존 메서드)
      */
     private fun parseApiResponse(response: String?): List<AladinBookDto> {
         if (response == null) return emptyList()
@@ -151,7 +183,7 @@ class AladinApiClient(
     }
 
     /**
-     * JSON에서 AladinBookDto 생성
+     * JSON에서 AladinBookDto 생성 (기존 메서드)
      */
     private fun parseBookFromJson(itemNode: JsonNode): AladinBookDto? {
         return try {
@@ -195,37 +227,25 @@ class AladinApiClient(
         }
     }
 
-    /**
-     * 페이지 정보 추출
-     */
     private fun extractPageInfo(itemNode: JsonNode): Int {
-        // 기본 itemPage 먼저 확인
         itemNode.get("itemPage")?.takeIf { !it.isNull }?.let {
             return it.asInt()
         }
-
-        // subInfo의 itemPage 확인
         itemNode.get("subInfo")?.get("itemPage")?.takeIf { !it.isNull }?.let {
             return it.asInt()
         }
-
         return 0
     }
 
-    /**
-     * 저자 정보 추출
-     */
     private fun extractAuthors(itemNode: JsonNode): List<String> {
         val authorNames = mutableSetOf<String>()
 
-        // 기본 author 필드에서 작가 정보 추출
         getJsonValue(itemNode, "author")
             ?.takeIf { it.isNotEmpty() }
             ?.split(",", ";")
             ?.mapNotNull { it.trim().takeIf { name -> name.isNotEmpty() } }
             ?.let { authorNames.addAll(it) }
 
-        // subInfo의 authors 배열에서 상세 작가 정보 추출
         itemNode.get("subInfo")?.get("authors")?.takeIf { it.isArray }?.let { authorsNode ->
             authorsNode.mapNotNull { authorNode ->
                 getJsonValue(authorNode, "authorName")
@@ -237,23 +257,14 @@ class AladinApiClient(
         return authorNames.toList()
     }
 
-    /**
-     * 도서 관련 타입인지 확인 (eBook 제거)
-     */
     private fun isBookRelatedType(mallType: String): Boolean {
         return mallType in setOf("BOOK", "FOREIGN")
     }
 
-    /**
-     * JSON에서 문자열 값 추출
-     */
     private fun getJsonValue(node: JsonNode, fieldName: String): String? {
         return node.get(fieldName)?.takeIf { !it.isNull }?.asText()
     }
 
-    /**
-     * 출간일 파싱 (다양한 형식 지원)
-     */
     private fun parsePubDate(pubDateStr: String): LocalDateTime {
         return try {
             when {

@@ -409,6 +409,71 @@ internal class BookServiceTest {
     }
 
     @Test
+    @DisplayName("카테고리별 검색 - DB에 충분한 책이 있는 경우")
+    fun getBooksByCategory_WhenSufficientBooksInDB_ShouldReturnFromDB() {
+        // Given
+        val categoryName = "소설"
+        val pageable = org.springframework.data.domain.PageRequest.of(0, 10)
+        val books = listOf(createTestBookWithAuthor())
+        val bookPage = org.springframework.data.domain.PageImpl(books, pageable, 20)
+        
+        Mockito.`when`(bookRepository.findValidBooksByCategory(categoryName, pageable))
+            .thenReturn(bookPage)
+        
+        // When
+        val result = bookService.getBooksByCategory(categoryName, pageable, null)
+        
+        // Then
+        Assertions.assertThat(result.content).hasSize(1)
+        Assertions.assertThat(result.totalElements).isEqualTo(20)
+        
+        // API 호출되지 않았는지 확인
+        Mockito.verify(aladinApiClient, Mockito.never()).searchBooksByCategory(any(), any(), any())
+    }
+
+    @Test
+    @DisplayName("카테고리별 검색 - DB에 책이 부족해서 알라딘 API 호출")
+    fun getBooksByCategory_WhenInsufficientBooksInDB_ShouldCallAladinAPI() {
+        // Given
+        val categoryName = "경제경영"
+        val pageable = org.springframework.data.domain.PageRequest.of(0, 10)
+        val emptyPage = org.springframework.data.domain.PageImpl<Book>(emptyList(), pageable, 0)
+        val apiBooks = listOf(createTestAladinBookDto())
+        val savedBook = createTestBookWithAuthor()
+        val updatedPage = org.springframework.data.domain.PageImpl(listOf(savedBook), pageable, 1)
+        
+        // Mock 설정 - 첫 번째 조회는 빈 결과, 두 번째 조회는 저장된 책 반환
+        Mockito.`when`(bookRepository.findValidBooksByCategory(categoryName, pageable))
+            .thenReturn(emptyPage)
+            .thenReturn(updatedPage)
+        Mockito.`when`(aladinApiClient.searchBooksByCategory(170, AladinApiClient.SearchTarget.BOOK, 100))
+            .thenReturn(apiBooks)
+        Mockito.`when`(categoryRepository.findByName("소설"))
+            .thenReturn(Category("소설"))
+        Mockito.`when`(authorRepository.findByName("J.K. 롤링"))
+            .thenReturn(null)
+        Mockito.`when`(authorRepository.save<Author?>(any()))
+            .thenAnswer { invocation -> invocation.getArgument<Any?>(0) }
+        Mockito.doAnswer { false }.`when`(wroteRepository).existsByAuthorAndBook(any(), any())
+        Mockito.`when`(wroteRepository.save<Wrote?>(any()))
+            .thenAnswer { invocation -> invocation.getArgument<Any?>(0) }
+        Mockito.`when`(bookRepository.findByIsbn13(any()))
+            .thenReturn(null)
+        Mockito.`when`(bookRepository.save<Book?>(any()))
+            .thenAnswer { invocation -> invocation.getArgument<Any?>(0) }
+        
+        // When
+        val result = bookService.getBooksByCategory(categoryName, pageable, null)
+        
+        // Then
+        Mockito.verify(aladinApiClient).searchBooksByCategory(170, AladinApiClient.SearchTarget.BOOK, 100)
+        Mockito.verify(bookRepository, Mockito.atLeastOnce()).save<Book?>(any())
+        Mockito.verify(authorRepository, Mockito.atLeastOnce()).save<Author?>(any())
+        Mockito.verify(bookRepository, Mockito.times(2)).findValidBooksByCategory(categoryName, pageable)
+        Assertions.assertThat(result.content).hasSize(1)
+    }
+
+    @Test
     @DisplayName("mallType 기반 기본 카테고리 - FOREIGN")
     fun categoryExtraction_ForeignBook_ShouldUseForeignCategory() {
         // Given

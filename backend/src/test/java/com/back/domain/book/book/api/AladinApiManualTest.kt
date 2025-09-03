@@ -123,6 +123,49 @@ internal class AladinApiManualTest {
     }
 
     @Test
+    @DisplayName("알라딘 API 카테고리별 검색 테스트")
+    fun testAladinCategorySearch() {
+        try {
+            val categoryConfigs = listOf(
+                170 to "경제경영",
+                798 to "사회과학",
+                1 to "소설/시/희곡",
+                656 to "인문학"
+            )
+
+            categoryConfigs.forEach { (categoryId, categoryName) ->
+                println("\n=== 카테고리 $categoryName (ID: $categoryId) 검색 테스트 ===")
+
+                val url = buildCategoryListUrl(categoryId = categoryId, maxResults = 3)
+                println("요청 URL: $url")
+
+                val response = restTemplate.getForObject(url, String::class.java)
+                    ?: return@forEach println("응답이 null입니다.")
+
+                val items = parseItemsFromResponse(response)
+
+                if (items.isNotEmpty()) {
+                    println("검색된 책 목록:")
+                    items.forEachIndexed { index, item ->
+                        println("${index + 1}. 제목: ${item.getTextValue("title")}")
+                        println("   작가: ${item.getTextValue("author")}")
+                        println("   카테고리: ${item.getTextValue("categoryName")}")
+                        println("   mallType: ${item.getTextValue("mallType")}")
+                        println()
+                    }
+                } else {
+                    println("카테고리 $categoryName 의 검색 결과가 없습니다.")
+                }
+
+                Thread.sleep(API_DELAY)
+            }
+
+        } catch (e: Exception) {
+            handleApiError("카테고리 검색 테스트", e)
+        }
+    }
+
+    @Test
     @DisplayName("알라딘 API 연결 테스트")
     fun testAladinConnection() {
         try {
@@ -183,6 +226,24 @@ internal class AladinApiManualTest {
         append("&output=js")
         append("&Version=20131101")
         append("&OptResult=$optResult")
+    }
+
+    private fun buildCategoryListUrl(
+        categoryId: Int,
+        maxResults: Int,
+        start: Int = 1,
+        searchTarget: String = "Book"
+    ): String = buildString {
+        append("$BASE_URL/ItemList.aspx")
+        append("?ttbkey=$API_KEY")
+        append("&QueryType=ItemNewAll")
+        append("&MaxResults=$maxResults")
+        append("&start=$start")
+        append("&SearchTarget=$searchTarget")
+        append("&CategoryId=$categoryId")
+        append("&output=js")
+        append("&Version=20131101")
+        append("&OptResult=authors")
     }
 
     private fun parseItemsFromResponse(response: String): List<JsonNode> {
