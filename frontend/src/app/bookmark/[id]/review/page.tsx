@@ -3,13 +3,15 @@ import { useAuth } from "@/app/_hooks/auth-context";
 import { useReview } from "@/app/_hooks/useReview";
 import withLogin from "@/app/_hooks/withLogin";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getBookmark } from "@/types/bookmarkAPI";
 import { BookmarkDetail } from "@/types/bookmarkData";
-import { AlertTriangle, ArrowLeft, Ban, CheckCircle, Edit, Save, Shield, Star, Trash2, UndoIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Ban, CheckCircle, Edit, Eye, Save, Shield, Star, Trash2, UndoIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useCallback, useEffect, useState } from "react";
 
@@ -26,6 +28,7 @@ export default withLogin(function page({params}:{params:Promise<{id:string}>}){
   const [book, setBook] = useState(bookmark?.book||null);
   const [bookId, setBookId] = useState(book?.id || null);
   const reviewApi = useReview(bookId||0);
+  const [spoiler, setSpoiler] = useState<boolean>(false);
 
   const fetchBookmark = async () => {
     const response = await getBookmark(bookmarkId);
@@ -78,9 +81,9 @@ export default withLogin(function page({params}:{params:Promise<{id:string}>}){
   const handleSave = async () => {
     // 여기서 실제로는 API 호출을 통해 리뷰를 저장
     if (!review){
-      await reviewApi.createReview({rating,  content});
+      await reviewApi.createReview({rating,  content, spoiler});
     }else{
-      await reviewApi.editReview({rating, content})
+      await reviewApi.editReview({rating, content, spoiler})
     }
     onNavigate(`/bookmark/${bookmarkId}`);
   };
@@ -238,6 +241,33 @@ export default withLogin(function page({params}:{params:Promise<{id:string}>}){
                   <span>최소 10자 이상 작성해주세요</span>
                   <span>{content.length}자</span>
                 </div>
+              </div>
+              {/* 스포일러 체크박스 */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="spoiler"
+                    checked={spoiler}
+                    onCheckedChange={(checked) => setSpoiler(checked as boolean)}
+                  />
+                  <Label 
+                    htmlFor="spoiler" 
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>이 리뷰에 스포일러가 포함되어 있습니다</span>
+                  </Label>
+                </div>
+                {spoiler && (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      스포일러로 표시된 리뷰는 다른 사용자들이 접힌 상태로 볼 수 있으며, 
+                      클릭해야 내용을 확인할 수 있습니다. 줄거리나 결말에 대한 내용이 
+                      포함된 경우 체크해주세요.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
 
               {/* 리뷰 작성 팁 */}
