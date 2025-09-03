@@ -36,8 +36,7 @@ class JwtAuthenticationFilter (
             "/h2-console",
             "/swagger-ui",
             "/v3",
-            "/categories",
-            "/books"
+            "/categories"
         )
     }
 
@@ -55,6 +54,10 @@ class JwtAuthenticationFilter (
             if (token == null || !Ut.jwt.isValid(secretKey, token)) {
                 // 특정 API 경로는 토큰 없이 접근 허용
                 if (isPublicPath(path)) {
+                    filterChain.doFilter(request, response)
+                    return
+                }
+                if (path.startsWith("/book")){
                     filterChain.doFilter(request, response)
                     return
                 }
