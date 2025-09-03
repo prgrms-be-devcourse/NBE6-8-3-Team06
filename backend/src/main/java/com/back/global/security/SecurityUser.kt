@@ -1,5 +1,6 @@
 package com.back.global.security
 
+import com.back.domain.member.member.constant.MemberRole
 import com.back.domain.member.member.entity.Member
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -15,7 +16,7 @@ data class SecurityUser(
     override fun getUsername(): String = member.getEmail()
     override fun getPassword(): String = member.getPassword()
     override fun getAuthorities(): Collection<GrantedAuthority> =
-        listOf(SimpleGrantedAuthority(member.getRole().value))
+        listOf(SimpleGrantedAuthority(member.getRole()?.value ?: MemberRole.USER.value))
     override fun isAccountNonExpired(): Boolean = true
     override fun isAccountNonLocked(): Boolean = true
     override fun isCredentialsNonExpired(): Boolean = true

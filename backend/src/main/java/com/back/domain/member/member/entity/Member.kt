@@ -81,7 +81,7 @@ class Member(
     }
     
     fun getRole(): MemberRole {
-        return role
+        return role ?: MemberRole.USER // null이면 기본값 반환
     }
     
     fun setRole(role: MemberRole) {
