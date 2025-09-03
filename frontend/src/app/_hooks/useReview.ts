@@ -78,23 +78,23 @@ export const useReview = (initBookId:number) =>{
     return data;
   }
 
-  const createReview = async ({ rating, content } : {rating:number, content:string}) => {
+  const createReview = async ({ rating, content, spoiler } : {rating:number, content:string, spoiler:boolean}) => {
       await apiFetch<ApiResponse>(`/reviews/${bookId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body:JSON.stringify({"content":content, "rate":rating})
+          body:JSON.stringify({"content":content, "rate":rating, "spoiler":spoiler})
         });
   }
 
-  const editReview = async({rating, content}:{rating:Number, content:string}) => {
+  const editReview = async({rating, content, spoiler}:{rating:Number, content:string, spoiler:boolean}) => {
     await apiFetch<ApiResponse>(`/reviews/${bookId}`, {
       method:"PUT",
       headers:{
         "Content-Type":"application/json",
       },
-      body:JSON.stringify({"content":content, "rate":rating})
+      body:JSON.stringify({"content":content, "rate":rating, "spoiler":spoiler})
     });
   }
 
