@@ -44,7 +44,7 @@ export default function page({params}:{params:Promise<{reportId:string}>}){
 
   const handleConfirmAction = async () => {
     if (!selectedReport || !actionType) return;
-    reviewReportApi.admProcessReport(reportId, {
+    await reviewReportApi.admProcessReport(reportId, {
       process:actionType,
       answer: adminMessage
     })
