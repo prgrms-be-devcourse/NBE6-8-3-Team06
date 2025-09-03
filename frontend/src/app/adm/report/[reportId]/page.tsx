@@ -72,7 +72,7 @@ export default function page({params}:{params:Promise<{reportId:string}>}){
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Button
-        onClick={() => toReportPage}
+        onClick={() => toReportPage()}
         variant="ghost"
         className="mb-6 flex items-center space-x-2"
       >
