@@ -15,11 +15,8 @@ import com.back.domain.book.wrote.repository.WroteRepository
 import com.back.domain.bookmarks.constant.ReadState
 import com.back.domain.bookmarks.repository.BookmarkRepository
 import com.back.domain.member.member.entity.Member
-import com.back.domain.review.review.dto.ReviewResponseDto
-import com.back.domain.review.review.entity.Review
 import com.back.domain.review.review.repository.ReviewRepository
 import com.back.domain.review.review.service.ReviewDtoService
-import com.back.domain.review.reviewRecommend.service.ReviewRecommendService
 import com.back.global.dto.PageResponseDto
 import com.back.global.exception.ServiceException
 import org.slf4j.LoggerFactory
@@ -27,6 +24,13 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+// 카테고리 매핑을 위한 데이터 클래스
+data class CategoryMapping(
+    val categoryName: String,
+    val aladinCategoryId: Int,
+    val searchTarget: AladinApiClient.SearchTarget = AladinApiClient.SearchTarget.BOOK
+)
 
 @Service
 class BookService(
@@ -42,7 +46,202 @@ class BookService(
 
     companion object {
         private val log = LoggerFactory.getLogger(BookService::class.java)
+
+        // 카테고리명과 알라딘 카테고리 ID 매핑
+        private val CATEGORY_MAPPINGS = mapOf(
+            // 국내도서 주요 카테고리
+            "소설/시/희곡" to CategoryMapping("소설/시/희곡", 1, AladinApiClient.SearchTarget.BOOK),
+            "경제경영" to CategoryMapping("경제경영", 170, AladinApiClient.SearchTarget.BOOK),
+            "자기계발" to CategoryMapping("자기계발", 336, AladinApiClient.SearchTarget.BOOK),
+            "컴퓨터/모바일" to CategoryMapping("컴퓨터/모바일", 351, AladinApiClient.SearchTarget.BOOK),
+            "인문학" to CategoryMapping("인문학", 656, AladinApiClient.SearchTarget.BOOK),
+            "역사" to CategoryMapping("역사", 74, AladinApiClient.SearchTarget.BOOK),
+            "과학" to CategoryMapping("과학", 987, AladinApiClient.SearchTarget.BOOK),
+            "예술/대중문화" to CategoryMapping("예술/대중문화", 517, AladinApiClient.SearchTarget.BOOK),
+            "사회과학" to CategoryMapping("사회과학", 798, AladinApiClient.SearchTarget.BOOK),
+            "어린이" to CategoryMapping("어린이", 1108, AladinApiClient.SearchTarget.BOOK),
+            "청소년" to CategoryMapping("청소년", 1137, AladinApiClient.SearchTarget.BOOK),
+            "가정/요리/뷰티" to CategoryMapping("가정/요리/뷰티", 1230, AladinApiClient.SearchTarget.BOOK),
+            "건강/취미/레저" to CategoryMapping("건강/취미/레저", 55890, AladinApiClient.SearchTarget.BOOK),
+            "여행" to CategoryMapping("여행", 1196, AladinApiClient.SearchTarget.BOOK),
+            "종교/역학" to CategoryMapping("종교/역학", 1237, AladinApiClient.SearchTarget.BOOK),
+            "외국어" to CategoryMapping("외국어", 1322, AladinApiClient.SearchTarget.BOOK),
+            "수험서/자격증" to CategoryMapping("수험서/자격증", 1383, AladinApiClient.SearchTarget.BOOK),
+            "만화" to CategoryMapping("만화", 2551, AladinApiClient.SearchTarget.BOOK),
+            "에세이" to CategoryMapping("에세이", 55889, AladinApiClient.SearchTarget.BOOK),
+
+            // 외국도서 주요 카테고리
+            "외국소설" to CategoryMapping("외국소설", 90842, AladinApiClient.SearchTarget.FOREIGN),
+            "외국경영" to CategoryMapping("외국경영", 90835, AladinApiClient.SearchTarget.FOREIGN),
+            "외국자기계발" to CategoryMapping("외국자기계발", 90854, AladinApiClient.SearchTarget.FOREIGN),
+            "외국컴퓨터" to CategoryMapping("외국컴퓨터", 90859, AladinApiClient.SearchTarget.FOREIGN),
+            "외국인문사회" to CategoryMapping("외국인문사회", 90853, AladinApiClient.SearchTarget.FOREIGN),
+            "외국자연과학" to CategoryMapping("외국자연과학", 90855, AladinApiClient.SearchTarget.FOREIGN),
+            "외국의학" to CategoryMapping("외국의학", 90852, AladinApiClient.SearchTarget.FOREIGN),
+            "외국어학" to CategoryMapping("외국어학", 90861, AladinApiClient.SearchTarget.FOREIGN),
+            "외국어린이" to CategoryMapping("외국어린이", 106165, AladinApiClient.SearchTarget.FOREIGN)
+        )
+
+        // API에서 가져올 최소 책 수
+        private const val MIN_BOOKS_TO_FETCH = 50
+        // API에서 가져올 최대 책 수
+        private const val MAX_BOOKS_TO_FETCH = 100
     }
+
+    /**
+     * 카테고리별 책 조회 (개선된 버전) - DB에 없으면 알라딘 API에서 가져옴
+     */
+    @Transactional
+    fun getBooksByCategory(categoryName: String, pageable: Pageable, member: Member? = null): Page<BookSearchDto> {
+        log.info(
+            "카테고리별 유효한 책 조회: category={}, page={}, size={}, sort={}, member={}",
+            categoryName, pageable.pageNumber, pageable.pageSize, pageable.sort,
+            member?.id ?: "null"
+        )
+
+        try {
+            // 1. DB에서 해당 카테고리의 유효한 책들 조회
+            val validBookPage = bookRepository.findValidBooksByCategory(categoryName, pageable)
+
+            // 2. DB에 충분한 책이 있으면 바로 반환
+            if (validBookPage.hasContent() && validBookPage.totalElements >= MIN_BOOKS_TO_FETCH) {
+                log.info("DB에서 충분한 책을 찾음: {}권", validBookPage.totalElements)
+                return validBookPage.map { convertToDto(it, member) }
+            }
+
+            // 3. DB에 책이 부족하면 알라딘 API에서 가져와서 보충
+            log.info("DB에 책이 부족하여 알라딘 API에서 보충: 현재 {}권", validBookPage.totalElements)
+
+            val categoryMapping = CATEGORY_MAPPINGS[categoryName]
+            if (categoryMapping != null) {
+                fetchAndSaveBooksFromApi(categoryMapping)
+
+                // 4. API 데이터 저장 후 다시 DB에서 조회
+                val updatedBookPage = bookRepository.findValidBooksByCategory(categoryName, pageable)
+                log.info("API 데이터 저장 후 재조회: {}권", updatedBookPage.totalElements)
+
+                return updatedBookPage.map { convertToDto(it, member) }
+            } else {
+                // 매핑되지 않은 카테고리는 DB 결과만 반환
+                log.warn("매핑되지 않은 카테고리: {}", categoryName)
+                return validBookPage.map { convertToDto(it, member) }
+            }
+
+        } catch (e: Exception) {
+            log.error("카테고리별 책 조회 중 오류 발생: category={}, error={}", categoryName, e.message)
+            throw ServiceException("500-3", "카테고리별 책 조회 중 오류가 발생했습니다.")
+        }
+    }
+
+    /**
+     * 검색어와 카테고리로 책 검색 (개선된 버전)
+     */
+    @Transactional
+    fun searchBooksByCategory(
+        query: String,
+        categoryName: String,
+        pageable: Pageable,
+        member: Member? = null
+    ): Page<BookSearchDto> {
+        log.info(
+            "검색어+카테고리로 유효한 책 조회: query={}, category={}, page={}, size={}, sort={}, member={}",
+            query, categoryName, pageable.pageNumber, pageable.pageSize, pageable.sort,
+            member?.id ?: "null"
+        )
+
+        try {
+            // 1. DB에서 검색어+카테고리로 조회
+            val validBookPage = bookRepository.findValidBooksByQueryAndCategory(query, categoryName, pageable)
+
+            // 2. 결과가 있으면 반환
+            if (validBookPage.hasContent()) {
+                log.info("DB 검색 결과: {}권", validBookPage.totalElements)
+                return validBookPage.map { convertToDto(it, member) }
+            }
+
+            // 3. DB에 결과가 없으면 일반 검색으로 폴백하되, 해당 카테고리만 필터링
+            log.info("DB에 검색 결과가 없어서 일반 검색 후 카테고리 필터링 수행")
+            val generalSearchResults = searchBooks(query, MAX_BOOKS_TO_FETCH, member)
+
+            // 카테고리 필터링
+            val filteredResults = generalSearchResults.filter { it.categoryName == categoryName }
+
+            // 페이징 처리 (수동으로 구현)
+            val startIndex = pageable.pageNumber * pageable.pageSize
+            val endIndex = minOf(startIndex + pageable.pageSize, filteredResults.size)
+
+            if (startIndex < filteredResults.size) {
+                val pagedResults = filteredResults.subList(startIndex, endIndex)
+                log.info("카테고리 필터링 후 결과: {}권 (전체 {}권 중 {}~{})",
+                    pagedResults.size, filteredResults.size, startIndex, endIndex)
+
+                return org.springframework.data.domain.PageImpl(
+                    pagedResults,
+                    pageable,
+                    filteredResults.size.toLong()
+                )
+            } else {
+                return Page.empty(pageable)
+            }
+
+        } catch (e: Exception) {
+            log.error(
+                "검색어+카테고리 책 조회 중 오류 발생: query={}, category={}, error={}",
+                query, categoryName, e.message
+            )
+            throw ServiceException("500-4", "검색어+카테고리 책 조회 중 오류가 발생했습니다.")
+        }
+    }
+
+    /**
+     * 알라딘 API에서 카테고리별 책 데이터를 가져와서 DB에 저장
+     */
+    private fun fetchAndSaveBooksFromApi(categoryMapping: CategoryMapping) {
+        try {
+            log.info("알라딘 API에서 {} 카테고리 데이터 가져오기 시작 (ID: {})",
+                categoryMapping.categoryName, categoryMapping.aladinCategoryId)
+
+            // 알라딘 API에서 카테고리별 책 데이터 조회 (단순히 신간 전체로 조회)
+            val apiBooks = aladinApiClient.searchBooksByCategory(
+                categoryMapping.aladinCategoryId,
+                categoryMapping.searchTarget,
+                MAX_BOOKS_TO_FETCH
+            )
+
+            if (apiBooks.isEmpty()) {
+                log.warn("알라딘 API에서 {} 카테고리의 책을 찾지 못했습니다", categoryMapping.categoryName)
+                return
+            }
+
+            log.info("알라딘 API에서 {}권의 책을 조회했습니다", apiBooks.size)
+
+            // API 결과를 엔티티로 변환하고 저장
+            val savedBooks = apiBooks.mapNotNull { apiBook ->
+                convertAndSaveBook(apiBook)?.also { savedBook ->
+                    // 카테고리 이름이 다르면 업데이트 (알라딘 카테고리와 DB 카테고리 매핑)
+                    if (savedBook.category.name != categoryMapping.categoryName) {
+                        val targetCategory = categoryRepository.findByName(categoryMapping.categoryName)
+                            ?: categoryRepository.save(Category(categoryMapping.categoryName))
+
+                        savedBook.category = targetCategory
+                        bookRepository.save(savedBook)
+                        log.debug("책 카테고리 업데이트: {} -> {}", savedBook.title, categoryMapping.categoryName)
+                    }
+                }
+            }
+
+            // 상세 정보 보완
+            enrichMissingDetails(savedBooks.toMutableList())
+
+            log.info("알라딘 API에서 {} 카테고리로 {}권의 책을 성공적으로 저장했습니다",
+                categoryMapping.categoryName, savedBooks.size)
+
+        } catch (e: Exception) {
+            log.error("알라딘 API에서 카테고리별 책 데이터 가져오기 실패: category={}, error={}",
+                categoryMapping.categoryName, e.message)
+        }
+    }
+
 
     /**
      * 페이징 지원 검색 메서드 - DB에서 직접 정렬 처리
@@ -257,84 +456,6 @@ class BookService(
     private fun getReadStatesForBooks(member: Member, bookIds: List<Int>): Map<Int, ReadState> {
         val bookmarks = bookmarkRepository.findByMemberAndBookIds(member, bookIds.toMutableList())
         return bookmarks.associate { it.book.id to it.readState }
-    }
-
-    /**
-     * 검색어와 카테고리로 책 검색 (페이징, Member 정보 포함)
-     */
-    fun searchBooksByCategory(
-        query: String,
-        categoryName: String,
-        pageable: Pageable,
-        member: Member? = null
-    ): Page<BookSearchDto> {
-        log.info(
-            "검색어+카테고리로 유효한 책 조회: query={}, category={}, page={}, size={}, sort={}, member={}",
-            query, categoryName, pageable.pageNumber, pageable.pageSize, pageable.sort,
-            member?.id ?: "null"
-        )
-
-        return try {
-            // 카테고리 존재 여부 확인
-            val category = categoryRepository.findByName(categoryName)
-            if (category == null) {
-                log.warn("존재하지 않는 카테고리: {}", categoryName)
-                return Page.empty(pageable)
-            }
-
-            // DB에서 페이징과 정렬이 적용된 조회
-            val validBookPage = bookRepository.findValidBooksByQueryAndCategory(query, categoryName, pageable)
-
-            log.info(
-                "검색 결과: {}개 책 발견 (전체 {}개)",
-                validBookPage.numberOfElements,
-                validBookPage.totalElements
-            )
-
-            validBookPage.map { book ->
-                val dto = convertToDto(book, member)
-                log.debug("Book {} converted with readState: {}", book.id, dto.readState)
-                dto
-            }
-        } catch (e: Exception) {
-            log.error(
-                "검색어+카테고리 책 조회 중 오류 발생: query={}, category={}, error={}",
-                query, categoryName, e.message
-            )
-            throw ServiceException("500-4", "검색어+카테고리 책 조회 중 오류가 발생했습니다.")
-        }
-    }
-
-    /**
-     * 카테고리별 책 조회 (페이징, Member 정보 포함)
-     */
-    fun getBooksByCategory(categoryName: String, pageable: Pageable, member: Member? = null): Page<BookSearchDto> {
-        log.info(
-            "카테고리별 유효한 책 조회: category={}, page={}, size={}, sort={}, member={}",
-            categoryName, pageable.pageNumber, pageable.pageSize, pageable.sort,
-            member?.id ?: "null"
-        )
-
-        return try {
-            // 카테고리 존재 여부 확인
-            val category = categoryRepository.findByName(categoryName)
-            if (category == null) {
-                log.warn("존재하지 않는 카테고리: {}", categoryName)
-                return Page.empty(pageable)
-            }
-
-            // DB에서 페이징과 정렬이 적용된 조회
-            val validBookPage = bookRepository.findValidBooksByCategory(categoryName, pageable)
-
-            validBookPage.map { book ->
-                val dto = convertToDto(book, member)
-                log.debug("Book {} converted with readState: {}", book.id, dto.readState)
-                dto
-            }
-        } catch (e: Exception) {
-            log.error("카테고리별 책 조회 중 오류 발생: {}", e.message)
-            throw ServiceException("500-3", "카테고리별 책 조회 중 오류가 발생했습니다.")
-        }
     }
 
     // ==== Private Methods ====
@@ -575,5 +696,4 @@ class BookService(
             readState = readState
         )
     }
-
 }
