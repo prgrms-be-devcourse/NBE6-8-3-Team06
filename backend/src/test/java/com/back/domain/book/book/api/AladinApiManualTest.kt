@@ -127,10 +127,10 @@ internal class AladinApiManualTest {
     fun testAladinCategorySearch() {
         try {
             val categoryConfigs = listOf(
-                170 to "문학",
-                798 to "어린이",
-                987 to "경제경영",
-                656 to "종교/역학"
+                170 to "경제경영",
+                798 to "사회과학",
+                1 to "소설/시/희곡",
+                656 to "인문학"
             )
 
             categoryConfigs.forEach { (categoryId, categoryName) ->
