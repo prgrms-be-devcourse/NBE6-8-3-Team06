@@ -30,10 +30,13 @@ export default function LoginPage() {
   const [currentTab, setCurrentTab] = useState("login");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
+  const NEXT_PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
+  
   // 카카오 로그인 핸들러
   const handleKakaoLogin = () => {
     const currentUrl = window.location.origin;
-    window.location.href = `http://localhost:8080/oauth2/authorization/kakao?redirectUrl=${encodeURIComponent(
+    window.location.href = `${NEXT_PUBLIC_API_BASE_URL}/oauth2/authorization/kakao?redirectUrl=${encodeURIComponent(
       currentUrl
     )}`;
   };
@@ -41,7 +44,7 @@ export default function LoginPage() {
   // Google 로그인 핸들러
   const handleGoogleLogin = () => {
     const currentUrl = window.location.origin;
-    window.location.href = `http://localhost:8080/oauth2/authorization/google?redirectUrl=${encodeURIComponent(
+    window.location.href = `${NEXT_PUBLIC_API_BASE_URL}/oauth2/authorization/google?redirectUrl=${encodeURIComponent(
       currentUrl
     )}`;
   };
