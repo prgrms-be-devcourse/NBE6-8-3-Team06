@@ -5,13 +5,13 @@ import { Badge } from "./ui/badge";
 
 export const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'PENDING':
         return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800"><Clock className="w-3 h-3 mr-1" />대기 중</Badge>;
-      case 'approved':
+      case 'ACCEPT':
         return <Badge variant="secondary" className="bg-green-100 text-green-800"><Check className="w-3 h-3 mr-1" />승인됨</Badge>;
-      case 'deleted':
+      case 'DELETE':
         return <Badge variant="destructive"><X className="w-3 h-3 mr-1" />삭제됨</Badge>;
-      case 'rejected':
+      case 'REJECT':
         return <Badge variant="outline"><Ban className="w-3 h-3 mr-1" />신고 기각</Badge>;
       default:
         return null;

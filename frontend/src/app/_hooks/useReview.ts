@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/apiFetch";
 import { ApiResponse } from "@/types/auth";
 import { PageResponseDto, ReviewResponseDto } from "@/types/book";
+import { ReviewReportCreateDto, ReviewReportDetailResponseDto, ReviewReportProcessDto, ReviewReportResponseDto } from "@/types/review";
 import { useState } from "react";
 
 export const useReviewRecommend = () =>{
@@ -118,41 +119,46 @@ export const useReview = (initBookId:number) =>{
 
 export const useReviewReport = () => {
   
-  const createReviewReport = async(reviewId:number) => {
-    const res = await apiFetch<ApiResponse>(`/reviews/${reviewId}`, {
+  const createReviewReport = async(reviewId:number, reviewReportCreateDto:ReviewReportCreateDto) => {
+    const res = await apiFetch<ApiResponse>(`/reviews/${reviewId}/report`, {
       method:"POST",
       headers:{
         "Content-Type":"application/json",
-      }
+      },
+      body: JSON.stringify(reviewReportCreateDto)
     });
-    const data:Object = res.data;
-    return data
   }
 
   const admSearchReviewReport = async(page:number, proceed:boolean)=>{
-    const res = await apiFetch<ApiResponse>(`/adm/reviews/report`,{
+    const params = new URLSearchParams();
+    params.append('page', JSON.stringify(page))
+    params.append("processed", JSON.stringify(proceed))
+    const res = await apiFetch<ApiResponse<PageResponseDto<ReviewReportResponseDto>>>(`/adm/reviews/report?${params.toString()}`,{
       method:"GET",
       headers:{
         "Content-Type":"application/json"
       }
     });
+    return res.data
   }
 
   const admGetReviewReport = async(reportId:number)=>{
-    const res = await apiFetch<ApiResponse>(`/adm/reviews/report/${reportId}`, {
+    const res = await apiFetch<ApiResponse<ReviewReportDetailResponseDto>>(`/adm/reviews/report/${reportId}`, {
       method:"GET",
       headers:{
         "Content-Type":"application/json"
       }
-    })
+    });
+    return res.data;
   }
 
-  const admProcessReport = async(reportId:number)=>{
+  const admProcessReport = async(reportId:number, reviewReportProcessDto:ReviewReportProcessDto)=>{
     const res = await apiFetch<ApiResponse>(`/adm/reviews/report/${reportId}`,{
       method:"PUT",
       headers:{
         "Content-Type":"application/json"
-      }
+      },
+      body: JSON.stringify(reviewReportProcessDto)
     })
   }
   return {

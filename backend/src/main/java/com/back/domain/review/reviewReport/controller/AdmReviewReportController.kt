@@ -4,6 +4,7 @@ import com.back.domain.review.reviewReport.dto.ReviewReportDetailResponseDto
 import com.back.domain.review.reviewReport.dto.ReviewReportProcessDto
 import com.back.domain.review.reviewReport.dto.ReviewReportResponseDto
 import com.back.domain.review.reviewReport.service.ReviewReportService
+import com.back.global.dto.PageResponseDto
 import com.back.global.rsData.RsData
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -29,9 +30,9 @@ class AdmReviewReportController(
         @PageableDefault pageable: Pageable,
         @RequestParam keyword: String?,
         @RequestParam processed: Boolean = false,
-    ):RsData<Page<ReviewReportResponseDto>> {
+    ):RsData<PageResponseDto<ReviewReportResponseDto>> {
         val reviewReportPage = reviewReportService.search(keyword, pageable, processed)
-        return RsData("200-1", "review successfully searched", reviewReportPage)
+        return RsData("200-1", "review successfully searched", PageResponseDto(reviewReportPage))
     }
 
     @GetMapping("/{report_id}")

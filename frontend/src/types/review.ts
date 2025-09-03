@@ -1,4 +1,14 @@
 
+export interface ReviewReportCreateDto{
+    reason:string,
+    description:string
+}
+
+export interface ReviewReportProcessDto{
+    process: string,
+    answer: string,
+}
+
 export interface ReviewReportResponseDto{
     id:number;
     createdDate:string;

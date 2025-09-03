@@ -1,5 +1,6 @@
 "use client"
 
+import { useReviewReport } from "@/app/_hooks/useReview";
 import { getReasonBadge, getStatusBadge } from "@/components/ReviewReportBadge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -10,20 +11,37 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { PageResponseDto, ReviewResponseDto } from "@/types/book";
 import { ReviewReportResponseDto } from "@/types/review";
 import { AlertTriangle, ArrowLeft, Ban, Check, Clock, Edit, Eye, Shield, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 export default function AdminReportsPage() {
-  const [reports, setReports] = useState<ReviewReportResponseDto[]>([]);
+  const [notProceedReports, setNotProceedReports] = useState<ReviewReportResponseDto[]>([]);
+  const [proceedReports, setProceedReports] = useState<ReviewReportResponseDto[]>([]);
   const [activeTab, setActiveTab] = useState('pending');
   const router = useRouter()
-  
+  const reviewReport = useReviewReport()
 
-  const pendingReports = reports.filter(report => report.reportState === 'pending');
-  const processedReports = reports.filter(report => report.reportState !== 'pending');
+  const fetchReport = async(page:number, processed:boolean) => {
+    const res:PageResponseDto<ReviewReportResponseDto> = await reviewReport.admSearchReviewReport(page, processed);
+    if (res.data == null){
+      return
+    }
+    if (processed){
+      setProceedReports(res.data)
+    }else{
+      setNotProceedReports(res.data)
+    }
+  }
+
+  useEffect(()=>{
+    fetchReport(0, false);
+    fetchReport(0, true);
+
+  },[])
 
   const onNavigate = (path: string) => {
     router.push(path);
@@ -31,6 +49,19 @@ export default function AdminReportsPage() {
 
   const moveToDetail = (reportId:number) => {
     onNavigate(`/adm/report/${reportId}`)
+  }
+
+  const changeTab = (value:string) => {
+    if (value == activeTab){
+      return
+    }
+    if (value === "pending"){
+      fetchReport(0, false)
+    }
+    else if (value === "processed"){
+      fetchReport(0, true)
+    }
+    setActiveTab(value)
   }
 
   return (
@@ -50,20 +81,20 @@ export default function AdminReportsPage() {
         </AlertDescription>
       </Alert>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={changeTab}>
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="pending" className="flex items-center space-x-2">
             <Clock className="h-4 w-4" />
-            <span>처리 대기 ({pendingReports.length})</span>
+            <span>처리 대기 ({notProceedReports.length})</span>
           </TabsTrigger>
           <TabsTrigger value="processed" className="flex items-center space-x-2">
             <Check className="h-4 w-4" />
-            <span>처리 완료 ({processedReports.length})</span>
+            <span>처리 완료 ({proceedReports.length})</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending">
-          {pendingReports.length === 0 ? (
+          {notProceedReports.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
                 <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -73,7 +104,7 @@ export default function AdminReportsPage() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {pendingReports.map((report) => (
+              {notProceedReports.map((report) => (
                 <Card key={report.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="py-4">
                     <div className="flex justify-between items-start">
@@ -108,7 +139,7 @@ export default function AdminReportsPage() {
         </TabsContent>
 
         <TabsContent value="processed">
-          {processedReports.length === 0 ? (
+          {proceedReports.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
                 <Check className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -118,7 +149,7 @@ export default function AdminReportsPage() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {processedReports.map((report) => (
+              {proceedReports.map((report) => (
                 <Card key={report.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="py-4">
                     <div className="flex justify-between items-start">

@@ -10,7 +10,7 @@ import { ArrowLeft, BookOpen, Building, Calendar, Flag, Globe, Heart, MoreHorizo
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { BookDetailDto, fetchBookDetail, ReviewResponseDto, addToMyBooks, ReadState } from "@/types/book";
-import { useReview, useReviewRecommend } from "@/app/_hooks/useReview";
+import { useReview, useReviewRecommend, useReviewReport } from "@/app/_hooks/useReview";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/app/_hooks/auth-context";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
     const router = useRouter();
     const reviewApi = useReview(bookId);
     const reviewRecommendApi = useReviewRecommend();
+    const reviewReportAPi = useReviewReport();
     const [tabState, setTabState] = useState("description");
     const [reviewPage, setReviewPage] = useState(0);
     const {theme} = useTheme();
@@ -149,8 +150,23 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
     setIsReportDialogOpen(true);
   };
 
-  const handleReportSubmit = () => {
-
+  const handleReportSubmit = async () => {
+    const review = selectedReview
+    if (review == null){
+      setIsReportDialogOpen(false)
+      return
+    }
+    await reviewReportAPi.createReviewReport(
+      review.id,
+      {
+        reason:reportReason,
+        description:reportDescription
+      }
+    )
+    setIsReportDialogOpen(false)
+    setSelectedReview(null);
+    setReportReason("")
+    setReportDescription("")
   }
 
   const handleRecommend = async(review:ReviewResponseDto, recommend:boolean)=>{
@@ -357,7 +373,7 @@ export default function page({params}:{params:Promise<{bookId:string}>}){
                                 <ThumbsDown fill={review.isRecommended === false ? theme==="dark"?"#fff":"#000" : "none"} strokeWidth={review.isRecommended===false?1:2} className="h-4 w-4 mr-1" />
                                 싫어요 {reviewRecommendApi.formatLikes(review.dislikeCount)}
                               </Button>
-                              <DropdownMenu>
+                              <DropdownMenu modal={false}>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
                                   <MoreHorizontal className="h-4 w-4" />
