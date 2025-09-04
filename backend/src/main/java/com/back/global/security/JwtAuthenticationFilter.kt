@@ -29,7 +29,10 @@ class JwtAuthenticationFilter (
         private val PUBLIC_PATHS = setOf(
             "/user/signup",
             "/user/login",
-            "/user/reissue"
+            "/user/reissue",
+
+            // 헬스체크 관련 url
+            "/actuator/health"
         )
 
         private val PUBLIC_PATH_PREFIXES = setOf(
