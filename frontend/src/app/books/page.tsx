@@ -274,11 +274,13 @@ export default function BooksPage() {
   ];
 
   const renderStars = (rating: number) => {
+    const safeRating = rating || 0;
+
     return [...Array(5)].map((_, i) => (
       <Star
         key={i}
         className={`h-4 w-4 ${
-          i < Math.floor(rating)
+          i < Math.floor(safeRating)
             ? "fill-yellow-400 text-yellow-400"
             : "text-gray-300"
         }`}
